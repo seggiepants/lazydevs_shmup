@@ -1,3 +1,4 @@
+-- _INIT() in Pico-8
 function love.load()
 
     screenW = 128
@@ -7,13 +8,15 @@ function love.load()
 
     success = love.window.setMode(screenW * screenScale, screenH * screenScale, {resizable=false})
     if (success) then
+        love.graphics.setDefaultFilter("nearest", "nearest", 1)
+
         font8 = love.graphics.newFont("font/Bitstream Vera Sans Mono Roman.ttf", 8, "mono", 1)
         love.graphics.setFont(font8)
 
-        
         -- pico-8 graphics page
         img = love.graphics.newImage("img/graphics.png")
 
+        white = {1, 1, 1, 1}
         -- pio-8 pallette
         pal = {{0/255, 0/255, 0/255}
         , {29/255, 43/255, 83/255}
@@ -47,65 +50,96 @@ function love.load()
                 end
             end
         end
+
+        Harry = 40
+        Mimi = 120
+        x = 64
+        y = 64
+        x1 = love.math.random(0, screenW)
+        y1 = love.math.random(0, screenH)
+        dx1 = love.math.random(-1, 1)
+        dy1 = love.math.random(-1, 1)
+        x2 = love.math.random(0, screenW)
+        y2 = love.math.random(0, screenH)
+        dx2 = love.math.random(-1, 1)
+        dy2 = love.math.random(-1, 1)
+        
     end
 end
 
+-- _DRAW() in Pico-8
+-- 30 FPS in Pico-8
 function love.draw()
-    -- scale to pico-8 screen size
+    -- scale to Pico-8 screen size
     love.graphics.push()
     love.graphics.scale(screenScale, screenScale)
     
-    love.graphics.clear(pal[3])
-    love.graphics.print("HELLO WORLD", 0, 0)
-    love.graphics.print("HELLO THIS IS DOG", 0, 8)
-    love.graphics.print("NEVER GONNA GIVE YOU UP", 0, 16)
-    love.graphics.print("OHAI", 20, 50)
-    love.graphics.print({pal[9], "I'M HERE"}, 80, 100)
+    love.graphics.clear(pal[1])
+    love.graphics.setColor(pal[(Mimi % #pal) + 1])
+    love.graphics.print(Harry, Mimi, 10)
+    
+    love.graphics.circle("line", 64, 64, Mimi)
+    love.graphics.setColor(white)
+    love.graphics.draw(img, quads[1], Harry, Harry)
 
-    love.graphics.draw(img, quads[1], 50, 70)
-    love.graphics.draw(img, quads[2], 80, 90)
-    love.graphics.setColor(pal[12])
-    love.graphics.circle("fill", 64, 64, 30)
-    love.graphics.setColor(pal[13])
-    love.graphics.rectangle("fill", 20, 20, 60, 20)
-    love.graphics.setColor(pal[8])
-
-    doggieZone()
+    doggieZoneDraw()
 
     -- restore screen size
     love.graphics.pop()
 end
 
-function doggieZone()
-    -- game mockup with a ship an enemy and a bullet/projectile/shot
-    local ship = 3
-    local enemy = 4
-    local shot = 5
-    love.math.setRandomSeed(42) -- 42 = Magic Number
-    --love.graphics.clear(pal[1])
-    love.graphics.setColor({0, 0, 0, 0.90})
-    love.graphics.rectangle("fill", 0, 0, screenW, screenH)
-    love.graphics.setColor(pal[8])
-
-    for i =0, 100 do
-        local x = love.math.random(0, screenW - 1)
-        local y = love.math.random(0, screenH - 1)
-        local clr = love.math.random(6, 8)
-        love.graphics.setColor(pal[clr])
-        love.graphics.rectangle("fill", x, y, 1, 1)
+function love.keypressed(key)
+    if key == "escape" then
+        love.event.quit()
     end
-    love.graphics.setColor(pal[8])
+end
 
-    for i = 0, 5 do
-        local x = love.math.random(0, screenW - tileSize)
-        local y = love.math.random(0, screenH / 2)
-        love.graphics.draw(img, quads[enemy], x, y)
+function love.quit()
+    print("Goodbye")
+end
+
+--- _UPDATE in Pico-8
+-- Hard 30 FPS in Pico-8
+function love.update(dt)
+    Harry = Harry + 2
+    Mimi = Mimi - 1
+    doggieZoneUpdate()
+
+end
+
+function doggieZoneDraw()
+    love.graphics.setColor(pal[4])
+    love.graphics.line(x1, y1, x2, y2)
+    love.graphics.setColor(white)
+    love.graphics.draw(img, quads[193], x, y)
+end
+function doggieZoneUpdate()
+    -- make some variables and do something interesting with them.
+    x = x + love.math.random(-1, 1)
+    y = y + love.math.random(-1, 1)
+    x1, dx1 = bounce(x1, dx1, screenW)
+    y1, dy1 = bounce(y1, dy1, screenH)
+    x2, dx2 = bounce(x2, dx2, screenW)
+    y2, dy2 = bounce(y2, dy2, screenH)  
+    if Harry > 128 then
+        Harry = 0
     end
-    local x = (screenW - tileSize) / 2
-    local y = 2 * screenH / 3
-    love.graphics.draw(img, quads[ship], x, y)
-    y = y - tileSize
-    for i = y, y - tileSize * 5, -tileSize do
-        love.graphics.draw(img, quads[shot], x, i)
-    end 
+
+    if Mimi < 0 then
+        Mimi = 128
+    end
+end
+
+function bounce(x, dx, maxX)
+    x = x + dx
+    if x < 0 then
+        x = 0
+        dx = math.abs(dx)
+    end
+    if x > maxX then
+        x = maxX
+        dx = -1 * math.abs(dx)
+    end
+
+    return x, dx
 end
