@@ -65,6 +65,9 @@ function love.load()
         shipSpr = 2
         flameSpr = 5
         muzzle = 0
+        score = 40000
+        lives = 3
+        booms = 1
 
         bulX = 64
         bulY = 40
@@ -104,6 +107,27 @@ function love.draw()
     end
     --spr(2, bulX, bulY)
 
+    love.graphics.setColor(pal[12])
+    love.graphics.print("SCORE: " .. score, 40, 1)
+    -- Lives
+    for i=1,4 do
+        if lives >= i then
+            spr(13, i * 9 - 8, 1)
+        else
+            spr(14, i * 9 - 8, 1)
+        end
+    end
+
+    -- DoggieZone - booms
+    for i=3,1,-1 do
+        local x = screenW - (3 * 9) + (i * 9) - tileSize - 1 
+        if booms >= i then
+            spr(29, x, 1)
+        else
+            spr(30, x, 1)
+        end
+    end
+    
     -- restore screen size
     love.graphics.pop()
 end
