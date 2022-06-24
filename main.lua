@@ -51,36 +51,29 @@ function love.load()
             end
         end
 
-        Harry = 40
-        Mimi = 120
-        x = 64
-        y = 64
-        x1 = love.math.random(0, screenW)
-        y1 = love.math.random(0, screenH)
-        dx1 = love.math.random(-1, 1)
-        dy1 = love.math.random(-1, 1)
-        x2 = love.math.random(0, screenW)
-        y2 = love.math.random(0, screenH)
-        dx2 = love.math.random(-1, 1)
-        dy2 = love.math.random(-1, 1)
-        
+        x = 60
+        y = 60        
+        speed = 1
+        local dx = love.math.random(0, 100) / 100.0
+        local dy = love.math.random(0, 100) / 100.0
+        if dx == 0 then
+            dx = -1
+        end
+        if dy == 0 then
+            dy = -1
+        end
+        dvd = { x = love.math.random(0, screenW - tileSize), y = math.random(0, screenH - tileSize), dx = dx, dy = dy}
     end
 end
 
--- _DRAW() in Pico-8
--- 30 FPS in Pico-8
+-- _DRAW() in PICO-8, 30 FPS
 function love.draw()
     -- scale to Pico-8 screen size
     love.graphics.push()
     love.graphics.scale(screenScale, screenScale)
     
     love.graphics.clear(pal[1])
-    love.graphics.setColor(pal[(Mimi % #pal) + 1])
-    love.graphics.print(Harry, Mimi, 10)
-    
-    love.graphics.circle("line", 64, 64, Mimi)
-    love.graphics.setColor(white)
-    love.graphics.draw(img, quads[1], Harry, Harry)
+    spr(1, x, y)
 
     doggieZoneDraw()
 
@@ -98,36 +91,53 @@ function love.quit()
     print("Goodbye")
 end
 
---- _UPDATE in Pico-8
--- Hard 30 FPS in Pico-8
+--- _UPDATE in PICO-8, Hard 30 FPS
 function love.update(dt)
-    Harry = Harry + 2
-    Mimi = Mimi - 1
+    -- Moving the ship
+    -- DoggieZone 1 - Move in y direction too.
+    -- DoggieZone 3 - Wrap around the screen.
+    if love.keyboard.isDown("up") then
+        y = y - speed
+    end
+
+    if love.keyboard.isDown("down") then
+        y = y + speed
+    end
+
+    if love.keyboard.isDown("left") then
+        x = x - speed
+    end
+
+    if love.keyboard.isDown("right") then
+        x = x + speed
+    end
+    if x < -1 * tileSize then
+        x = screenW
+    elseif x > screenW then
+        x = -1 * tileSize
+    end
+
+    if y < -1 * tileSize then
+        y = screenH
+    elseif y > screenH then
+        y = -1 * tileSize
+    end
+    
+    --x = clamp(x, 0, screenW - tileSize)
+    --y = clamp(y, 0, screenH - tileSize)
     doggieZoneUpdate()
 
 end
 
 function doggieZoneDraw()
-    love.graphics.setColor(pal[4])
-    love.graphics.line(x1, y1, x2, y2)
-    love.graphics.setColor(white)
-    love.graphics.draw(img, quads[193], x, y)
+    -- #3 - Draw a sprite that bounces like the dvd logo screen saver 
+    spr(97, dvd.x, dvd.y)
 end
-function doggieZoneUpdate()
-    -- make some variables and do something interesting with them.
-    x = x + love.math.random(-1, 1)
-    y = y + love.math.random(-1, 1)
-    x1, dx1 = bounce(x1, dx1, screenW)
-    y1, dy1 = bounce(y1, dy1, screenH)
-    x2, dx2 = bounce(x2, dx2, screenW)
-    y2, dy2 = bounce(y2, dy2, screenH)  
-    if Harry > 128 then
-        Harry = 0
-    end
 
-    if Mimi < 0 then
-        Mimi = 128
-    end
+function doggieZoneUpdate()
+    -- #3 - Draw a sprite that bounces like the dvd logo screen saver
+    dvd.x, dvd.dx = bounce(dvd.x, dvd.dx, screenW - tileSize)
+    dvd.y, dvd.dy = bounce(dvd.y, dvd.dy, screenH - tileSize)
 end
 
 function bounce(x, dx, maxX)
@@ -142,4 +152,13 @@ function bounce(x, dx, maxX)
     end
 
     return x, dx
+end
+
+function clamp(value, minValue, maxValue)
+    return math.max(minValue, math.min(maxValue, value))
+end
+
+function spr(id, x, y)
+    love.graphics.setColor(white)
+    love.graphics.draw(img, quads[id], x, y)
 end
