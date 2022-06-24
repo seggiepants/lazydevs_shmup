@@ -62,13 +62,16 @@ function love.load()
         shipY = (screenH - tileSize) / 2
         shipSx = 0
         shipSy = 0
+        shipSpr = 2
+        flameSpr = 5
+        muzzle = 0
 
         bulX = 64
         bulY = 40
         shootOK = true
         switchOK = true
         shotType = 1
-        shotTypes = {2, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
+        shotTypes = {16, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
         shots = {}
     end
 end
@@ -80,8 +83,6 @@ function love.draw()
     love.graphics.scale(screenScale, screenScale)
     
     love.graphics.clear(pal[1])
-    spr(1, shipX, shipY)
-    --spr(2, bulX, bulY)
 
     for key, shot in ipairs(shots) do
         if shot.shotType == 2 then --laser
@@ -94,6 +95,15 @@ function love.draw()
             spr(shot.sprite, shot.x, shot.y)
         end
     end
+
+    spr(shipSpr, shipX, shipY)
+    spr(flameSpr, shipX, shipY + tileSize)
+    if muzzle > 0 then
+        love.graphics.setColor(pal[7])
+        love.graphics.circle("fill", shipX + 4, shipY - 2, muzzle)
+    end
+    --spr(2, bulX, bulY)
+
     -- restore screen size
     love.graphics.pop()
 end
@@ -112,6 +122,12 @@ end
 function love.update(dt)
     shipSx = 0
     shipSy = 0
+    shipSpr = 2
+    flameSpr = flameSpr + 1
+    if flameSpr > 9 then
+        flameSpr = 5
+    end
+
     if love.keyboard.isDown("up") then
         shipSy = -2
     end
@@ -122,10 +138,12 @@ function love.update(dt)
 
     if love.keyboard.isDown("left") then
         shipSx = -2
+        shipSpr = 1
     end
 
     if love.keyboard.isDown("right") then
         shipSx = 2
+        shipSpr = 3
     end
 
     if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
@@ -134,6 +152,7 @@ function love.update(dt)
             --bulY = shipY - (tileSize/2)
             addShot(shipX, shipY - (tileSize / 2))
             love.audio.play(sfx["laser"])
+            muzzle = 7
             shootOK = false
         end
     else
@@ -156,9 +175,6 @@ function love.update(dt)
     shipX = shipX + shipSx
     shipY = shipY + shipSy
 
-    -- Move the bullet
-    --bulY = bulY - 4
-
     if shipX < -1 * tileSize then
         shipX = screenW
     elseif shipX > screenW then
@@ -170,6 +186,9 @@ function love.update(dt)
     elseif shipY > screenH then
         shipY = -1 * tileSize
     end
+
+    -- Move the bullet
+    --bulY = bulY - 4
 
     for key, shot in ipairs(shots) do
         if shot.shotType == 4 then -- wave
@@ -187,6 +206,11 @@ function love.update(dt)
             shot.x > screenW + tileSize then
             table.remove(shots, key)
         end
+    end
+
+    -- Animate muzzle flash
+    if muzzle >0 then
+        muzzle = muzzle - 2
     end
 end
 
