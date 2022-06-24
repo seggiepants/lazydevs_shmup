@@ -1,3 +1,7 @@
+-- 04_Shooting
+-- DoggieZone = Create three more types of shots.
+-- Now you have normal, laser, spread, and wave.
+
 -- _INIT() in Pico-8
 function love.load()
 
@@ -51,18 +55,21 @@ function love.load()
             end
         end
 
-        x = 60
-        y = 60        
-        speed = 1
-        local dx = love.math.random(0, 100) / 100.0
-        local dy = love.math.random(0, 100) / 100.0
-        if dx == 0 then
-            dx = -1
-        end
-        if dy == 0 then
-            dy = -1
-        end
-        dvd = { x = love.math.random(0, screenW - tileSize), y = math.random(0, screenH - tileSize), dx = dx, dy = dy}
+        sfx = {}
+        sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
+
+        shipX = (screenW - tileSize) / 2
+        shipY = (screenH - tileSize) / 2
+        shipSx = 0
+        shipSy = 0
+
+        bulX = 64
+        bulY = 40
+        shootOK = true
+        switchOK = true
+        shotType = 1
+        shotTypes = {2, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
+        shots = {}
     end
 end
 
@@ -73,10 +80,20 @@ function love.draw()
     love.graphics.scale(screenScale, screenScale)
     
     love.graphics.clear(pal[1])
-    spr(1, x, y)
+    spr(1, shipX, shipY)
+    --spr(2, bulX, bulY)
 
-    doggieZoneDraw()
-
+    for key, shot in ipairs(shots) do
+        if shot.shotType == 2 then --laser
+            y = shot.y
+            while y > -1 * tileSize do
+                spr(shot.sprite, shot.x, y)
+                y = y - tileSize
+            end
+        else
+            spr(shot.sprite, shot.x, shot.y)
+        end
+    end
     -- restore screen size
     love.graphics.pop()
 end
@@ -93,51 +110,115 @@ end
 
 --- _UPDATE in PICO-8, Hard 30 FPS
 function love.update(dt)
-    -- Moving the ship
-    -- DoggieZone 1 - Move in y direction too.
-    -- DoggieZone 3 - Wrap around the screen.
+    shipSx = 0
+    shipSy = 0
     if love.keyboard.isDown("up") then
-        y = y - speed
+        shipSy = -2
     end
 
     if love.keyboard.isDown("down") then
-        y = y + speed
+        shipSy = 2
     end
 
     if love.keyboard.isDown("left") then
-        x = x - speed
+        shipSx = -2
     end
 
     if love.keyboard.isDown("right") then
-        x = x + speed
-    end
-    if x < -1 * tileSize then
-        x = screenW
-    elseif x > screenW then
-        x = -1 * tileSize
+        shipSx = 2
     end
 
-    if y < -1 * tileSize then
-        y = screenH
-    elseif y > screenH then
-        y = -1 * tileSize
+    if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
+        if shootOK then
+            --bulX = shipX
+            --bulY = shipY - (tileSize/2)
+            addShot(shipX, shipY - (tileSize / 2))
+            love.audio.play(sfx["laser"])
+            shootOK = false
+        end
+    else
+        shootOK = true
     end
-    
-    --x = clamp(x, 0, screenW - tileSize)
-    --y = clamp(y, 0, screenH - tileSize)
-    doggieZoneUpdate()
 
+    if love.keyboard.isDown("tab") or love.keyboard.isDown("x") then
+        if switchOK then
+            shotType = shotType + 1
+            if shotType > 4 then
+                shotType = 1
+            end
+            switchOK = false
+        end
+    else
+        switchOK = true
+    end
+
+    -- Moving the ship
+    shipX = shipX + shipSx
+    shipY = shipY + shipSy
+
+    -- Move the bullet
+    --bulY = bulY - 4
+
+    if shipX < -1 * tileSize then
+        shipX = screenW
+    elseif shipX > screenW then
+        shipX = -1 * tileSize
+    end
+
+    if shipY < -1 * tileSize then
+        shipY = screenH
+    elseif shipY > screenH then
+        shipY = -1 * tileSize
+    end
+
+    for key, shot in ipairs(shots) do
+        if shot.shotType == 4 then -- wave
+            shot.x = shot.x + (math.cos(shot.time) * shot.amplitude)
+            shot.time = shot.time + .75
+            shot.amplitude = shot.amplitude + .75
+        else
+            shot.x = shot.x + shot.dx
+        end
+        shot.y = shot.y + shot.dy
+        if shot.lifetime < 0 or 
+            shot.y < -1 * tileSize or
+            shot.y > screenH + tileSize or
+            shot.x < -1 * tileSize or
+            shot.x > screenW + tileSize then
+            table.remove(shots, key)
+        end
+    end
 end
 
-function doggieZoneDraw()
-    -- #3 - Draw a sprite that bounces like the dvd logo screen saver 
-    spr(97, dvd.x, dvd.y)
-end
+function addShot(x, y)
+    shot = { x = x, y = y, homeX = x, homeY = y, sprite = shotTypes[shotType], shotType = shotType}
+    shot.dx = 0
+    shot.dy = -4
+    shot.lifetime = 300
 
-function doggieZoneUpdate()
-    -- #3 - Draw a sprite that bounces like the dvd logo screen saver
-    dvd.x, dvd.dx = bounce(dvd.x, dvd.dx, screenW - tileSize)
-    dvd.y, dvd.dy = bounce(dvd.y, dvd.dy, screenH - tileSize)
+    if shotType == 2 then
+        shot.lifetime = 7
+    end
+
+    if shotType == 4 then
+        shot.amplitude = 1
+        shot.time = 0.0
+    end
+
+    if shotType == 3 then
+        for angle = 60, 120, 10 do
+            newShot = {}
+            for key, value in pairs(shot) do
+                newShot[key] = value
+            end
+
+            newShot.dx = math.cos(math.rad(angle)) * 4
+            newShot.dy = math.sin(math.rad(angle)) * -4
+            table.insert(shots, newShot)
+        end
+    else
+        table.insert(shots, shot)
+    end
 end
 
 function bounce(x, dx, maxX)
