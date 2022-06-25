@@ -1,6 +1,5 @@
--- 04_Shooting
--- DoggieZone = Create three more types of shots.
--- Now you have normal, laser, spread, and wave.
+require "draw"
+require "update"
 
 -- _INIT() in Pico-8
 function love.load()
@@ -65,9 +64,18 @@ function love.load()
         shipSpr = 2
         flameSpr = 5
         muzzle = 0
-        score = 40000
+        score = love.math.random(1000)
         lives = 3
-        booms = 1
+        local starClr = {6, 7, 8, 16}
+        stars = {}
+        for i=1,100 do
+            star = {} 
+            star.x = love.math.random(screenW)
+            star.y = love.math.random(screenH)
+            star.clr = starClr[love.math.random(#starClr)]
+            star.spd = love.math.random() * 3 + 1
+            table.insert(stars, star)
+        end
 
         bulX = 64
         bulY = 40
@@ -86,6 +94,7 @@ function love.draw()
     love.graphics.scale(screenScale, screenScale)
     
     love.graphics.clear(pal[1])
+    drawStarfield()
 
     for key, shot in ipairs(shots) do
         if shot.shotType == 2 then --laser
@@ -118,16 +127,6 @@ function love.draw()
         end
     end
 
-    -- DoggieZone - booms
-    for i=3,1,-1 do
-        local x = screenW - (3 * 9) + (i * 9) - tileSize - 1 
-        if booms >= i then
-            spr(29, x, 1)
-        else
-            spr(30, x, 1)
-        end
-    end
-    
     -- restore screen size
     love.graphics.pop()
 end
@@ -236,6 +235,9 @@ function love.update(dt)
     if muzzle >0 then
         muzzle = muzzle - 2
     end
+
+    -- Animate the star field
+    updateStarfield()
 end
 
 function addShot(x, y)
@@ -285,9 +287,4 @@ end
 
 function clamp(value, minValue, maxValue)
     return math.max(minValue, math.min(maxValue, value))
-end
-
-function spr(id, x, y)
-    love.graphics.setColor(white)
-    love.graphics.draw(img, quads[id], x, y)
 end
