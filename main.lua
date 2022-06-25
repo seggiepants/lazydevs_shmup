@@ -1,6 +1,11 @@
 require "draw"
 require "update"
 
+-- DoggieZone
+-- 1. Add another star color.
+-- 2. Fast moving stars as line.
+-- 3. Multiple bullets did in previous DoggieZone with multiple weapon types.
+
 -- _INIT() in Pico-8
 function love.load()
 
@@ -72,8 +77,7 @@ function love.load()
             star = {} 
             star.x = love.math.random(screenW)
             star.y = love.math.random(screenH)
-            star.clr = starClr[love.math.random(#starClr)]
-            star.spd = love.math.random() * 3 + 1
+            star.spd = (love.math.random() * 1.5) + .05
             table.insert(stars, star)
         end
 
