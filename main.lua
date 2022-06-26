@@ -2,9 +2,8 @@ require "draw"
 require "update"
 
 -- DoggieZone
--- 1. Add another star color.
--- 2. Fast moving stars as line.
--- 3. Multiple bullets did in previous DoggieZone with multiple weapon types.
+-- 1. Add another mode (Get Ready 3, 2, 1 GO)
+-- 2. Make Start/End screens prettier (logo sprite, pattern [stars, polka dots, etc.])
 
 -- _INIT() in Pico-8
 function love.load()
@@ -43,8 +42,6 @@ function love.load()
         , {255/255, 119/255, 168/255}
         , {255/255, 204/255, 170/255}}
 
-        love.graphics.setColor(pal[8])
-
         quads = {}
         imgW, imgH = img:getDimensions()
         i = 0
@@ -62,32 +59,18 @@ function love.load()
         sfx = {}
         sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
 
-        shipX = (screenW - tileSize) / 2
-        shipY = (screenH - tileSize) / 2
-        shipSx = 0
-        shipSy = 0
         shipSpr = 2
         flameSpr = 5
-        muzzle = 0
-        score = love.math.random(1000)
         lives = 3
-        local starClr = {6, 7, 8, 16}
         stars = {}
-        for i=1,100 do
-            star = {} 
-            star.x = love.math.random(screenW)
-            star.y = love.math.random(screenH)
-            star.spd = (love.math.random() * 1.5) + .05
-            table.insert(stars, star)
-        end
-
-        bulX = 64
-        bulY = 40
         shootOK = true
         switchOK = true
         shotType = 1
         shotTypes = {16, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
         shots = {}
+        buttonReady = false
+        blinkT = 1
+        mode = "START"
     end
 end
 
@@ -97,38 +80,14 @@ function love.draw()
     love.graphics.push()
     love.graphics.scale(screenScale, screenScale)
     
-    love.graphics.clear(pal[1])
-    drawStarfield()
-
-    for key, shot in ipairs(shots) do
-        if shot.shotType == 2 then --laser
-            y = shot.y
-            while y > -1 * tileSize do
-                spr(shot.sprite, shot.x, y)
-                y = y - tileSize
-            end
-        else
-            spr(shot.sprite, shot.x, shot.y)
-        end
-    end
-
-    spr(shipSpr, shipX, shipY)
-    spr(flameSpr, shipX, shipY + tileSize)
-    if muzzle > 0 then
-        love.graphics.setColor(pal[7])
-        love.graphics.circle("fill", shipX + 4, shipY - 2, muzzle)
-    end
-    --spr(2, bulX, bulY)
-
-    love.graphics.setColor(pal[12])
-    love.graphics.print("SCORE: " .. score, 40, 1)
-    -- Lives
-    for i=1,4 do
-        if lives >= i then
-            spr(13, i * 9 - 8, 1)
-        else
-            spr(14, i * 9 - 8, 1)
-        end
+    if mode == "GAME" then
+        drawGame()
+    elseif mode == "GET_READY" then
+        drawGetReady()
+    elseif mode == "START" then
+        drawStart()
+    elseif mode == "OVER" then
+        drawOver()
     end
 
     -- restore screen size
@@ -147,101 +106,18 @@ end
 
 --- _UPDATE in PICO-8, Hard 30 FPS
 function love.update(dt)
-    shipSx = 0
-    shipSy = 0
-    shipSpr = 2
-    flameSpr = flameSpr + 1
-    if flameSpr > 9 then
-        flameSpr = 5
+    blinkT = blinkT + 1
+    if mode == "GAME" then
+        updateGame(dt)
+    elseif mode == "GET_READY" then
+        updateGetReady(dt)
+    elseif mode == "START" then
+        -- Start Screen
+        updateStart(dt)
+    elseif mode == "OVER" then
+        -- Game Over Screen
+        updateOver(dt)
     end
-
-    if love.keyboard.isDown("up") then
-        shipSy = -2
-    end
-
-    if love.keyboard.isDown("down") then
-        shipSy = 2
-    end
-
-    if love.keyboard.isDown("left") then
-        shipSx = -2
-        shipSpr = 1
-    end
-
-    if love.keyboard.isDown("right") then
-        shipSx = 2
-        shipSpr = 3
-    end
-
-    if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
-        if shootOK then
-            --bulX = shipX
-            --bulY = shipY - (tileSize/2)
-            addShot(shipX, shipY - (tileSize / 2))
-            love.audio.play(sfx["laser"])
-            muzzle = 7
-            shootOK = false
-        end
-    else
-        shootOK = true
-    end
-
-    if love.keyboard.isDown("tab") or love.keyboard.isDown("x") then
-        if switchOK then
-            shotType = shotType + 1
-            if shotType > 4 then
-                shotType = 1
-            end
-            switchOK = false
-        end
-    else
-        switchOK = true
-    end
-
-    -- Moving the ship
-    shipX = shipX + shipSx
-    shipY = shipY + shipSy
-
-    if shipX < -1 * tileSize then
-        shipX = screenW
-    elseif shipX > screenW then
-        shipX = -1 * tileSize
-    end
-
-    if shipY < -1 * tileSize then
-        shipY = screenH
-    elseif shipY > screenH then
-        shipY = -1 * tileSize
-    end
-
-    -- Move the bullet
-    --bulY = bulY - 4
-
-    for key, shot in ipairs(shots) do
-        if shot.shotType == 4 then -- wave
-            shot.x = shot.x + (math.cos(shot.time) * shot.amplitude)
-            shot.time = shot.time + .75
-            shot.amplitude = shot.amplitude + .75
-        else
-            shot.x = shot.x + shot.dx
-        end
-        shot.y = shot.y + shot.dy
-        if shot.lifetime < 0 or 
-            shot.y < -1 * tileSize or
-            shot.y > screenH + tileSize or
-            shot.x < -1 * tileSize or
-            shot.x > screenW + tileSize then
-            table.remove(shots, key)
-        end
-    end
-
-    -- Animate muzzle flash
-    if muzzle >0 then
-        muzzle = muzzle - 2
-    end
-
-    -- Animate the star field
-    updateStarfield()
 end
 
 function addShot(x, y)
@@ -273,6 +149,14 @@ function addShot(x, y)
     else
         table.insert(shots, shot)
     end
+end
+
+function blink()
+    local blinkAni = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 8, 8, 7, 7, 6, 6}
+    if blinkT > #blinkAni then
+        blinkT = 1
+    end
+    return blinkAni[blinkT]
 end
 
 function bounce(x, dx, maxX)
