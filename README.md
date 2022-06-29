@@ -8,3 +8,7 @@ from [PICO-8](https://www.lexaloffle.com/pico-8.php) to [Love2d](https://love2d.
 You can watch the videos in the following playlist
 
 Lazy Devs [Youtube Playlist](https://www.youtube.com/playlist?list=PLea8cjCua_P3Sfq4XJqNVbd1vsWnh7LZd)
+
+Requirements:
+* Love2D
+* LunaJson (install via LuaRocks)

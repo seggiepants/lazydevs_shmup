@@ -1,8 +1,14 @@
+if (os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1") then
+    require("lldebugger").start()
+end
+json = require "lunajson"
 require "draw"
 require "update"
 
 -- DoggieZone
--- 1. More bullet attributes -- done previously already have a spread shot.
+-- 1. Spawn more enemies, patterns over time.
+-- 2. Multiple enemy types (a 2nd one)
+-- 3. Add a property to the enemy. (sx, sy, spriteMin, spriteMax, etc.)
 
 -- _INIT() in Pico-8
 function love.load()
@@ -41,6 +47,8 @@ function love.load()
         , {255/255, 119/255, 168/255}
         , {255/255, 204/255, 170/255}}
 
+        local levelTxt = love.filesystem.read("/levels/level.json")
+        levelJson = json.decode(levelTxt)
         quads = {}
         imgW, imgH = img:getDimensions()
         i = 0
@@ -58,10 +66,12 @@ function love.load()
         sfx = {}
         sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
 
-        shipSpr = 2
+        ship = {}
+        ship.sprite = 2
         flameSpr = 5
         lives = 3
         stars = {}
+        enemies = {}
         shootOK = true
         switchOK = true
         shotType = 1
@@ -70,6 +80,9 @@ function love.load()
         buttonReady = false
         blinkT = 1
         mode = "START"
+        printScreenReleased = false
+
+        local enemy = {}
     end
 end
 
@@ -117,18 +130,24 @@ function love.update(dt)
         -- Game Over Screen
         updateOver(dt)
     end
+    if love.keyboard.isDown("p") then
+        if printScreenReleased then
+            printScreenReleased = false
+            love.graphics.captureScreenshot("screenshot" .. os.time() .. ".png")
+        end
+    else
+        printScreenReleased = true
+    end
 end
 
 function addShot(x, y)
     shot = {}
     shot.x = x
     shot.y = y
-    shot.homeX = x
-    shot.homeY = y
     shot.sprite = shotTypes[shotType]
     shot.shotType = shotType
-    shot.dx = 0
-    shot.dy = -4
+    shot.sx = 0
+    shot.sy = -4
     shot.lifetime = 300
 
     if shotType == 2 then
@@ -147,13 +166,49 @@ function addShot(x, y)
                 newShot[key] = value
             end
 
-            newShot.dx = math.cos(math.rad(angle)) * 4
-            newShot.dy = math.sin(math.rad(angle)) * -4
+            newShot.sx = math.cos(math.rad(angle)) * 4
+            newShot.sy = math.sin(math.rad(angle)) * -4
             table.insert(shots, newShot)
         end
     else
         table.insert(shots, shot)
     end
+end
+
+function addEnemy(prototype)
+    local enemy = {}
+    for key, value in pairs(prototype) do
+        enemy[key] = value
+    end
+    if enemy.x == nil then
+        enemy.x = (screenW - tileSize) / 2
+    end
+    if enemy.y == nil then
+        enemy.y = -1 * tileSize
+    end
+
+    if enemy.sx == nil then
+        enemy.sx = 0
+    end
+    
+    if enemy.sy == nil then
+        enemy.sy = 1
+    end
+
+    if enemy.enemyType == nil or enemy.enemyType == "eye" then
+        enemy.sprite = 21
+        enemy.spriteMin = 21
+        enemy.spriteMax = 24
+    elseif enemy.enemyType == "jelly" then
+        enemy.sprite = 37
+        enemy.spriteMin = 37
+        enemy.spriteMax = 40
+    end
+    enemy.time = 0
+    enemy.visible = false
+    enemy.dead = false
+
+    table.insert(enemies, enemy)
 end
 
 function blink()

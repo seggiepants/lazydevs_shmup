@@ -2,6 +2,12 @@ function drawGame()
     love.graphics.clear(pal[1])
     drawStarfield()
 
+    -- Draw Enemies
+    for key, enemy in pairs(enemies) do
+        drawSprite(enemy)
+    end        
+
+    -- Draw Bullets
     for key, shot in ipairs(shots) do
         if shot.shotType == 2 then --laser
             y = shot.y
@@ -10,15 +16,15 @@ function drawGame()
                 y = y - tileSize
             end
         else
-            spr(shot.sprite, shot.x, shot.y)
+            drawSprite(shot)
         end
     end
-
-    spr(shipSpr, shipX, shipY)
-    spr(flameSpr, shipX, shipY + tileSize)
+    drawSprite(ship)
+    --spr(ship.sprite, ship.x, ship.y)
+    spr(flameSpr, ship.x, ship.y + tileSize)
     if muzzle > 0 then
         love.graphics.setColor(pal[7])
-        love.graphics.circle("fill", shipX + 4, shipY - 2, muzzle)
+        love.graphics.circle("fill", ship.x + 4, ship.y - 2, muzzle)
     end
     
     love.graphics.setColor(pal[12])
@@ -61,6 +67,10 @@ function drawGetReady()
         countDown = "GO!"
     end
     centerPrint(countDown, 60, clr)
+end
+
+function drawSprite(sprite)
+    spr(math.floor(sprite.sprite), sprite.x, sprite.y)
 end
 
 function drawStarfield()
