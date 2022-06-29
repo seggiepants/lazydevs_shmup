@@ -2,8 +2,7 @@ require "draw"
 require "update"
 
 -- DoggieZone
--- 1. Add another mode (Get Ready 3, 2, 1 GO)
--- 2. Make Start/End screens prettier (logo sprite, pattern [stars, polka dots, etc.])
+-- 1. More bullet attributes -- done previously already have a spread shot.
 
 -- _INIT() in Pico-8
 function love.load()
@@ -121,7 +120,13 @@ function love.update(dt)
 end
 
 function addShot(x, y)
-    shot = { x = x, y = y, homeX = x, homeY = y, sprite = shotTypes[shotType], shotType = shotType}
+    shot = {}
+    shot.x = x
+    shot.y = y
+    shot.homeX = x
+    shot.homeY = y
+    shot.sprite = shotTypes[shotType]
+    shot.shotType = shotType
     shot.dx = 0
     shot.dy = -4
     shot.lifetime = 300

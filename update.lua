@@ -27,11 +27,9 @@ function updateGame(dt)
 
     if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
         if shootOK then
-            --bulX = shipX
-            --bulY = shipY - (tileSize/2)
             addShot(shipX, shipY - (tileSize / 2))
             love.audio.play(sfx["laser"])
-            muzzle = 7
+            muzzle = 6
             shootOK = false
         end
     else
@@ -47,12 +45,6 @@ function updateGame(dt)
 
     if love.keyboard.isDown("tab") or love.keyboard.isDown("x") then
         if switchOK then
-            -- delete me
-            if buttonReady then
-                buttonReady = false
-                mode = "OVER"
-            end
-            --
             shotType = shotType + 1
             if shotType > 4 then
                 shotType = 1
@@ -63,6 +55,13 @@ function updateGame(dt)
         switchOK = true
     end
 
+    if love.keyboard.isDown("q") then
+        if buttonReady then
+            buttonReady = false
+            mode = "OVER"
+        end
+    end
+    
     -- Moving the ship
     shipX = shipX + shipSx
     shipY = shipY + shipSy
@@ -80,9 +79,9 @@ function updateGame(dt)
     end
 
     -- Move the bullet
-    --bulY = bulY - 4
 
-    for key, shot in ipairs(shots) do
+    for i = #shots, 1, -1  do
+        shot = shots[i]
         if shot.shotType == 4 then -- wave
             shot.x = shot.x + (math.cos(shot.time) * shot.amplitude)
             shot.time = shot.time + .75
@@ -96,7 +95,7 @@ function updateGame(dt)
             shot.y > screenH + tileSize or
             shot.x < -1 * tileSize or
             shot.x > screenW + tileSize then
-            table.remove(shots, key)
+            table.remove(shots, i)
         end
     end
 
