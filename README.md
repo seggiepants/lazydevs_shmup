@@ -12,3 +12,4 @@ Lazy Devs [Youtube Playlist](https://www.youtube.com/playlist?list=PLea8cjCua_P3
 Requirements:
 * Love2D
 * LunaJson (install via LuaRocks)
+* If editing in VS Code will want the Local Lua Debugger extension.

@@ -25,12 +25,19 @@ function updateGame(dt)
         ship.sprite = 3
     end
 
+    if ship.shotTimeout > 0 then
+        ship.shotTimeout = ship.shotTimeout - 1
+    else
+        shootOK = true
+    end
+    
     if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
         if shootOK then
             addShot(ship.x, ship.y - (tileSize / 2))
             love.audio.play(sfx["laser"])
             muzzle = 6
             shootOK = false
+            ship.shotTimeout = shotTimeoutMax
         end
     else
         shootOK = true
@@ -54,28 +61,21 @@ function updateGame(dt)
     else
         switchOK = true
     end
-
-    if love.keyboard.isDown("q") then
-        if buttonReady then
-            buttonReady = false
-            mode = "OVER"
-        end
-    end
     
     -- Moving the ship
     ship.x = ship.x + ship.sx
     ship.y = ship.y + ship.sy
 
-    if ship.x < -1 * tileSize then
-        ship.x = screenW
-    elseif ship.x > screenW then
-        ship.x = -1 * tileSize
+    if ship.x < 0 then
+        ship.x = 0
+    elseif ship.x >= screenW - tileSize then
+        ship.x = screenW - tileSize
     end
 
-    if ship.y < -1 * tileSize then
-        ship.y = screenH
-    elseif ship.y > screenH then
-        ship.y = -1 * tileSize
+    if ship.y < 0 then
+        ship.y = 0
+    elseif ship.y > screenH - tileSize then
+        ship.y = screenH - tileSize
     end
 
     -- Move the bullet
@@ -122,6 +122,34 @@ function updateGame(dt)
         end
     end
 
+    -- Collision Ship x Enemies
+    if ship.invulnerable > 0 then
+        ship.invulnerable = ship.invulnerable - 1
+    else
+        for i = #enemies, 1, -1 do
+            if collide(ship, enemies[i]) then
+                lives = lives - 1
+                ship.invulnerable = invulnerableMax
+                love.audio.play(sfx["hurt"])
+                table.remove(enemies, i)
+            end
+        end
+    end
+
+    -- Collision Enemies x Shots
+    for i = #enemies, 1, -1 do
+        local enemy = enemies[i]
+        for j = #shots, 1, -1 do
+            if collide(enemy, shots[j]) then
+                table.remove(shots, j)
+                enemy.hp = enemy.hp - 1
+                if enemy.hp <= 0 then
+                    table.remove(enemies, i)
+                end
+            end     
+        end
+    end
+
     -- Animate muzzle flash
     if muzzle >0 then
         muzzle = muzzle - 2
@@ -129,6 +157,10 @@ function updateGame(dt)
 
     -- Animate the star field
     updateStarfield()
+
+    if lives <= 0 then
+        mode = "OVER"
+    end
 end
 
 function updateGetReady(dt)
@@ -179,7 +211,7 @@ function updateStart(dt)
             love.keyboard.isDown("x") or
             love.keyboard.isDown("space") or 
             love.keyboard.isDown("z") then
-            startGetReady()
+            startGame() -- was get ready
         end 
     end
 end
@@ -190,6 +222,8 @@ function startGame()
     ship.sx = 0
     ship.sy = 0
     ship.sprite = 2
+    ship.invulnerable = 0
+    ship.shotTimeout = 0
     flameSpr = 5
     muzzle = 0
     score = 0

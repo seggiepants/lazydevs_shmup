@@ -19,9 +19,11 @@ function drawGame()
             drawSprite(shot)
         end
     end
-    drawSprite(ship)
-    --spr(ship.sprite, ship.x, ship.y)
-    spr(flameSpr, ship.x, ship.y + tileSize)
+    if ship.invulnerable <= 0 or ship.invulnerable % 2 == 1 then
+        drawSprite(ship)
+        --spr(ship.sprite, ship.x, ship.y)
+        spr(flameSpr, ship.x, ship.y + tileSize)
+    end
     if muzzle > 0 then
         love.graphics.setColor(pal[7])
         love.graphics.circle("fill", ship.x + 4, ship.y - 2, muzzle)

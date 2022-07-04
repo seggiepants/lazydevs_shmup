@@ -6,9 +6,9 @@ require "draw"
 require "update"
 
 -- DoggieZone
--- 1. Spawn more enemies, patterns over time.
--- 2. Multiple enemy types (a 2nd one)
--- 3. Add a property to the enemy. (sx, sy, spriteMin, spriteMax, etc.)
+-- 1. Bullet enemy collision
+-- 2. Autofire - consistently spaced no initial delay for keyboard repeat
+-- 3. Ship temporarily invulnerable on hit. Let enemy hang around for now instead of deleting them.
 
 -- _INIT() in Pico-8
 function love.load()
@@ -65,7 +65,7 @@ function love.load()
 
         sfx = {}
         sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
-
+        sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
         ship = {}
         ship.sprite = 2
         flameSpr = 5
@@ -81,6 +81,8 @@ function love.load()
         blinkT = 1
         mode = "START"
         printScreenReleased = false
+        invulnerableMax = 60
+        shotTimeoutMax = 10
 
         local enemy = {}
     end
@@ -204,6 +206,11 @@ function addEnemy(prototype)
         enemy.spriteMin = 37
         enemy.spriteMax = 40
     end
+
+    if enemy.hp == nil then
+        enemy.hp = 1
+    end
+
     enemy.time = 0
     enemy.visible = false
     enemy.dead = false
@@ -235,4 +242,26 @@ end
 
 function clamp(value, minValue, maxValue)
     return math.max(minValue, math.min(maxValue, value))
+end
+
+function collide(a, b)
+    local x1, y1, w1, h1 = quads[math.floor(a.sprite)]:getViewport()
+    local x2, y2, w2, h2 = quads[math.floor(b.sprite)]:getViewport()
+    if a.y >= b.y + h2 - 1 then
+        return false
+     end
+    
+    if a.x >= b.x + w2 - 1 then
+        return false
+    end
+
+    if a.x + w1 - 1 <= b.x then
+        return false
+    end
+    
+    if a.y + h1 - 1 <= b.y then
+        return false
+    end
+
+    return true
 end

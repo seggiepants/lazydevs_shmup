@@ -1,0 +1,69 @@
+{
+    "name": "LEVEL 1"
+    ,"enemies": [
+        {
+            "time": 0.0
+            , "enemyType": "eye"
+            , "x": 60
+            , "y": -8
+            , "sx": 0
+            , "sy": 0.5
+            , "hp": 1
+        }
+        , {
+            "time": 1.0
+            , "enemyType": "eye"
+            , "x": 0
+            , "y": -8
+            , "sx": 0.25
+            , "sy": 0.5
+            , "hp": 1
+        } 
+        , {
+            "time": 2.0
+            , "enemyType": "eye"
+            , "x": 120
+            , "y": -8
+            , "sx": -0.25
+            , "sy": 0.5
+            , "hp": 1
+        }
+
+        , {
+            "time": 3.0
+            , "enemyType": "jelly"
+            , "x": 20
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 0.5
+            , "hp": 1
+        }
+        , {
+            "time": 3.0
+            , "enemyType": "jelly"
+            , "x": 50
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 0.5
+            , "hp": 1
+        }
+        , {
+            "time": 3.0
+            , "enemyType": "jelly"
+            , "x": 80
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 0.5
+            , "hp": 1
+        }
+        , {
+            "time": 3.0
+            , "enemyType": "jelly"
+            , "x": 100
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 0.5
+            , "hp": 1
+        }
+    ]
+}
