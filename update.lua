@@ -1,87 +1,98 @@
-function updateGame(dt)
-    ship.sx = 0
-    ship.sy = 0
-    ship.sprite = 2
-    flameSpr = flameSpr + 1
-    if flameSpr > 9 then
-        flameSpr = 5
+function UpdateGame(dt)
+    Ship.sx = 0
+    Ship.sy = 0
+    Ship.sprite = 2
+    FlameSpr = FlameSpr + 1
+    if FlameSpr > 9 then
+        FlameSpr = 5
     end
 
     if love.keyboard.isDown("up") then
-        ship.sy = -2
+        Ship.sy = -2
     end
 
     if love.keyboard.isDown("down") then
-        ship.sy = 2
+        Ship.sy = 2
     end
 
     if love.keyboard.isDown("left") then
-        ship.sx = -2
-        ship.sprite = 1
+        Ship.sx = -2
+        Ship.sprite = 1
     end
 
     if love.keyboard.isDown("right") then
-        ship.sx = 2
-        ship.sprite = 3
+        Ship.sx = 2
+        Ship.sprite = 3
     end
 
-    if ship.shotTimeout > 0 then
-        ship.shotTimeout = ship.shotTimeout - 1
+    if Ship.shotTimeout > 0 then
+        Ship.shotTimeout = Ship.shotTimeout - 1
     else
-        shootOK = true
+        ShootOK = true
     end
     
     if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
-        if shootOK then
-            addShot(ship.x, ship.y - (tileSize / 2))
-            love.audio.play(sfx["laser"])
-            muzzle = 6
-            shootOK = false
-            ship.shotTimeout = shotTimeoutMax
+        if ShootOK then
+            AddShot(Ship.x, Ship.y - (TileSize / 2))
+            love.audio.play(Sfx["laser"])
+            Muzzle = 6
+            ShootOK = false
+            Ship.shotTimeout = ShotTimeoutMax
         end
     else
-        shootOK = true
+        ShootOK = true
     end
 
     if love.keyboard.isDown("tab") == false and 
         love.keyboard.isDown("x") == false and
         love.keyboard.isDown("space") == false and
         love.keyboard.isDown("z") == false then
-        buttonReady = true
+        ButtonReady = true
     end
 
     if love.keyboard.isDown("tab") or love.keyboard.isDown("x") then
-        if switchOK then
-            shotType = shotType + 1
-            if shotType > 4 then
-                shotType = 1
+        if SwitchOK then
+            ShotType = ShotType + 1
+            if ShotType > 4 then
+                ShotType = 1
             end
-            switchOK = false
+            SwitchOK = false
         end
     else
-        switchOK = true
+        SwitchOK = true
     end
     
     -- Moving the ship
-    ship.x = ship.x + ship.sx
-    ship.y = ship.y + ship.sy
+    Ship.x = Ship.x + Ship.sx
+    Ship.y = Ship.y + Ship.sy
 
-    if ship.x < 0 then
-        ship.x = 0
-    elseif ship.x >= screenW - tileSize then
-        ship.x = screenW - tileSize
+    if Ship.x < 0 then
+        Ship.x = 0
+    elseif Ship.x >= ScreenW - TileSize then
+        Ship.x = ScreenW - TileSize
     end
 
-    if ship.y < 0 then
-        ship.y = 0
-    elseif ship.y > screenH - tileSize then
-        ship.y = screenH - tileSize
+    if Ship.y < 0 then
+        Ship.y = 0
+    elseif Ship.y > ScreenH - TileSize then
+        Ship.y = ScreenH - TileSize
+    end
+
+    -- Move particles
+    for i = #Particles, 1, -1 do
+        local particle = Particles[i]
+        particle.x = particle.x + particle.sx
+        particle.y = particle.y + particle.sy
+        particle.lifeTime = particle.lifeTime - 1
+        if particle.lifeTime <= 0 then
+            table.remove(Particles, i)
+        end
     end
 
     -- Move the bullet
-    for i = #shots, 1, -1  do
-        shot = shots[i]
-        if shot.shotType == 4 then -- wave
+    for i = #Shots, 1, -1  do
+        local shot = Shots[i]
+        if shot.ShotType == 4 then -- wave
             shot.x = shot.x + (math.cos(shot.time) * shot.amplitude)
             shot.time = shot.time + .75
             shot.amplitude = shot.amplitude + .75
@@ -90,17 +101,17 @@ function updateGame(dt)
         end
         shot.y = shot.y + shot.sy
         if shot.lifetime < 0 or 
-            shot.y < -1 * tileSize or
-            shot.y > screenH + tileSize or
-            shot.x < -1 * tileSize or
-            shot.x > screenW + tileSize then
-            table.remove(shots, i)
+            shot.y < -1 * TileSize or
+            shot.y > ScreenH + TileSize or
+            shot.x < -1 * TileSize or
+            shot.x > ScreenW + TileSize then
+            table.remove(Shots, i)
         end
     end
 
     -- Move the enemies
-    for i = #enemies, 1, -1 do
-        local enemy = enemies[i]
+    for i = #Enemies, 1, -1 do
+        local enemy = Enemies[i]
         enemy.time = enemy.time + dt
         enemy.y = enemy.y + enemy.sy
         enemy.x = enemy.x + enemy.sx
@@ -108,148 +119,157 @@ function updateGame(dt)
         if enemy.sprite >= enemy.spriteMax + 1 then
             enemy.sprite = enemy.spriteMin
         end
-        if enemy.y > screenH then
-            table.remove(enemies, i)
+        if enemy.y > ScreenH then
+            table.remove(Enemies, i)
+        end
+        if enemy.blink > 0 then
+            enemy.blink = enemy.blink - 1
         end
     end
 
     -- Spawn new enemies
-    previousTime = time
-    time = time + dt
-    for i, enemy in pairs(levelJson["enemies"]) do
-        if enemy.time >= previousTime and enemy.time < time then
-            addEnemy(enemy)
-        end
-    end
-
-    -- Collision Ship x Enemies
-    if ship.invulnerable > 0 then
-        ship.invulnerable = ship.invulnerable - 1
-    else
-        for i = #enemies, 1, -1 do
-            if collide(ship, enemies[i]) then
-                lives = lives - 1
-                ship.invulnerable = invulnerableMax
-                love.audio.play(sfx["hurt"])
-                table.remove(enemies, i)
-            end
+    PreviousTime = Time
+    Time = Time + dt
+    for i, enemy in pairs(LevelJson["enemies"]) do
+        if enemy.time >= PreviousTime and enemy.time < Time then
+            AddEnemy(enemy)
         end
     end
 
     -- Collision Enemies x Shots
-    for i = #enemies, 1, -1 do
-        local enemy = enemies[i]
-        for j = #shots, 1, -1 do
-            if collide(enemy, shots[j]) then
-                table.remove(shots, j)
+    for i = #Enemies, 1, -1 do
+        local enemy = Enemies[i]
+        for j = #Shots, 1, -1 do
+            if Collide(enemy, Shots[j]) then
+                love.audio.play(Sfx["enemyHit"])
+                enemy.blink = BlinkTimeoutMax
+                table.remove(Shots, j)
                 enemy.hp = enemy.hp - 1
                 if enemy.hp <= 0 then
-                    table.remove(enemies, i)
+                    local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
+                    AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2))
+                    table.remove(Enemies, i)
+                    Score = Score + 1
                 end
             end     
         end
     end
 
-    -- Animate muzzle flash
-    if muzzle >0 then
-        muzzle = muzzle - 2
+    -- Collision Ship x Enemies
+    if Ship.invulnerable > 0 then
+        Ship.invulnerable = Ship.invulnerable - 1
+    else
+        for i = #Enemies, 1, -1 do
+            if Collide(Ship, Enemies[i]) then
+                Lives = Lives - 1
+                Ship.invulnerable = InvulnerableMax
+                love.audio.play(Sfx["hurt"])
+                table.remove(Enemies, i)
+            end
+        end
+    end
+
+    -- Animate Muzzle flash
+    if Muzzle >0 then
+        Muzzle = Muzzle - 2
     end
 
     -- Animate the star field
-    updateStarfield()
+    UpdateStarfield()
 
-    if lives <= 0 then
-        mode = "OVER"
+    if Lives <= 0 then
+        Mode = "OVER"
     end
 end
 
-function updateGetReady(dt)
-    getReadyTime = getReadyTime + dt
-    if getReadyTime >= 4 then
-        startGame()
+function UpdateGetReady(dt)
+    GetReadyTime = GetReadyTime + dt
+    if GetReadyTime >= 4 then
+        StartGame()
     end
 end
 
-function updateStarfield()
-    for key, star in ipairs(stars) do
+function UpdateStarfield()
+    for key, star in ipairs(Stars) do
         star.y = star.y + star.spd
-        if star.y >= screenH then
-            star.x = love.math.random(screenW)
-            star.y = star.y - screenH - tileSize
+        if star.y >= ScreenH then
+            star.x = love.math.random(ScreenW)
+            star.y = star.y - ScreenH - TileSize
         end
     end
 end
 
-function updateOver(dt)
+function UpdateOver(dt)
     if love.keyboard.isDown("tab") == false and 
         love.keyboard.isDown("x") == false and
         love.keyboard.isDown("space") == false and
         love.keyboard.isDown("z") == false then
-        buttonReady = true
+        ButtonReady = true
     end
-    if buttonReady then
+    if ButtonReady then
         if love.keyboard.isDown("tab") or 
             love.keyboard.isDown("x") or
             love.keyboard.isDown("space") or 
             love.keyboard.isDown("z") then
-            buttonReady = false
-            mode = "START"
+            ButtonReady = false
+            Mode = "START"
         end 
     end
 end
 
-function updateStart(dt)
+function UpdateStart(dt)
     if love.keyboard.isDown("tab") == false and 
         love.keyboard.isDown("x") == false and
         love.keyboard.isDown("space") == false and
         love.keyboard.isDown("z") == false then
-        buttonReady = true
+        ButtonReady = true
     end
 
-    if buttonReady then
+    if ButtonReady then
         if love.keyboard.isDown("tab") or 
             love.keyboard.isDown("x") or
             love.keyboard.isDown("space") or 
             love.keyboard.isDown("z") then
-            startGame() -- was get ready
+            StartGame() -- was get ready
         end 
     end
 end
 
-function startGame()
-    ship.x = (screenW - tileSize) / 2
-    ship.y = (screenH - tileSize) / 2
-    ship.sx = 0
-    ship.sy = 0
-    ship.sprite = 2
-    ship.invulnerable = 0
-    ship.shotTimeout = 0
-    flameSpr = 5
-    muzzle = 0
-    score = 0
-    lives = 3
+function StartGame()
+    T = 0
+    Ship.x = (ScreenW - TileSize) / 2
+    Ship.y = (ScreenH - TileSize) / 2
+    Ship.sx = 0
+    Ship.sy = 0
+    Ship.sprite = 2
+    Ship.invulnerable = 0
+    Ship.shotTimeout = 0
+    FlameSpr = 5
+    Muzzle = 0
+    Score = 0
+    Lives = 3
     local starClr = {6, 7, 8, 16}
-    stars = {}
+    Stars = {}
     for i=1,100 do
-        star = {} 
-        star.x = love.math.random(screenW)
-        star.y = love.math.random(screenH)
+        local star = {} 
+        star.x = love.math.random(ScreenW)
+        star.y = love.math.random(ScreenH)
         star.spd = (love.math.random() * 1.5) + .05
-        table.insert(stars, star)
+        table.insert(Stars, star)
     end
 
-    shootOK = true
-    switchOK = true
-    shotType = 1
-    shots = {}
-    buttonReady = false
-    mode = "GAME"
-    enemies = {}
-    time = 0
-    previousTime = -1.0
+    ShootOK = true
+    SwitchOK = true
+    ShotType = 1
+    Shots = {}
+    ButtonReady = false
+    Mode = "GAME"
+    Enemies = {}
+    Time = 0
+    PreviousTime = -1.0
 end
 
-function startGetReady()
-    getReadyTime = 0
-    mode = "GET_READY"
+function StartGetReady()
+    GetReadyTime = 0
+    Mode = "GET_READY"
 end

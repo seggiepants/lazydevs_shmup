@@ -1,90 +1,125 @@
 if (os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1") then
     require("lldebugger").start()
 end
-json = require "lunajson"
+Json = require "lunajson"
 require "draw"
 require "update"
 
+-- To Do:
+-- Explosions, enemy just dissapearing is bad
+-- Hit Reaction
+
 -- DoggieZone
--- 1. Bullet enemy collision
--- 2. Autofire - consistently spaced no initial delay for keyboard repeat
--- 3. Ship temporarily invulnerable on hit. Let enemy hang around for now instead of deleting them.
+-- 1. Explosions - Sprite animation, or circle animation
+-- 2. Maybe color flash white
+
 
 -- _INIT() in Pico-8
 function love.load()
 
-    screenW = 128
-    screenH = 128
-    screenScale = 4
-    tileSize = 8
+    ScreenW = 128
+    ScreenH = 128
+    ScreenScale = 4
+    TileSize = 8
 
-    success = love.window.setMode(screenW * screenScale, screenH * screenScale, {resizable=false})
+    local success = love.window.setMode(ScreenW * ScreenScale, ScreenH * ScreenScale, {resizable=false})
     if (success) then
         love.graphics.setDefaultFilter("nearest", "nearest", 1)
 
-        font8 = love.graphics.newFont("font/Bitstream Vera Sans Mono Roman.ttf", 8, "mono", 1)
-        love.graphics.setFont(font8)
+        Font8 = love.graphics.newFont("font/Bitstream Vera Sans Mono Roman.ttf", 8, "mono", 1)
+        love.graphics.setFont(Font8)
 
         -- pico-8 graphics page
-        img = love.graphics.newImage("img/graphics.png")
+        Img = love.graphics.newImage("img/graphics.png", nil)
 
-        white = {1, 1, 1, 1}
+        White = {1, 1, 1, 1}
         -- pio-8 pallette
-        pal = {{0/255, 0/255, 0/255}
-        , {29/255, 43/255, 83/255}
-        , {126/255, 37/255, 83/255}
-        , {0/255, 135/255, 81/255}
-        , {171/255, 82/255, 54/255}
-        , {95/255, 87/255, 79/255}
-        , {194/255, 195/255, 199/255}
-        , {255/255, 241/255, 232/255}
-        , {255/255, 0/255, 77/255}
-        , {255/255, 163/255, 0/255}
-        , {255/255, 236/255, 39/255}
-        , {0/255, 228/255, 54/255}
-        , {41/255, 173/255, 255/255}
-        , {131/255, 118/255, 156/255}
-        , {255/255, 119/255, 168/255}
-        , {255/255, 204/255, 170/255}}
+        Pal = {{0/255, 0/255, 0/255, 1.0}
+        , {29/255, 43/255, 83/255, 1.0}
+        , {126/255, 37/255, 83/255, 1.0}
+        , {0/255, 135/255, 81/255, 1.0}
+        , {171/255, 82/255, 54/255, 1.0}
+        , {95/255, 87/255, 79/255, 1.0}
+        , {194/255, 195/255, 199/255, 1.0}
+        , {255/255, 241/255, 232/255, 1.0}
+        , {255/255, 0/255, 77/255, 1.0}
+        , {255/255, 163/255, 0/255, 1.0}
+        , {255/255, 236/255, 39/255, 1.0}
+        , {0/255, 228/255, 54/255, 1.0}
+        , {41/255, 173/255, 255/255, 1.0}
+        , {131/255, 118/255, 156/255, 1.0}
+        , {255/255, 119/255, 168/255, 1.0}
+        , {255/255, 204/255, 170/255, 1.0}}
+
+        -- Shader stolen from the love2d.org forums by s-ol
+        RecolorShader = love.graphics.newShader(
+            [[
+                #ifdef VERTEX
+                vec4 position( mat4 transform_projection, vec4 vertex_position)
+                {
+                    return (transform_projection * vertex_position);
+                }
+                #endif
+                #ifdef PIXEL
+                extern vec4 Pal[15]; // size of color palette (16 colors)
+                vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
+                {
+                    vec4 pixel = Texel(texture, texture_coords);
+                    for(int i = 0; i < 15; i++)
+                    {
+                        if (pixel == Pal[i])
+                        {
+                            return vec4(1.0, 1.0, 1.0, 1.0);
+                        }
+                    }
+                    return pixel;
+                }
+                #endif
+            ]]
+        )
+        RecolorShader:send("Pal", Pal[2], Pal[3], Pal[4], Pal[5], Pal[6], Pal[7], Pal[8], Pal[9], Pal[10], Pal[11], Pal[12], Pal[13], Pal[14], Pal[15])
 
         local levelTxt = love.filesystem.read("/levels/level.json")
-        levelJson = json.decode(levelTxt)
-        quads = {}
-        imgW, imgH = img:getDimensions()
-        i = 0
-        for y = 0, imgH - 1, tileSize
+        LevelJson = Json.decode(levelTxt)
+        Quads = {}
+        local imgW, imgH = Img:getDimensions()
+        local i = 0
+        for y = 0, imgH - 1, TileSize
         do
-            for x = 0, imgW - 1, tileSize
+            for x = 0, imgW - 1, TileSize
             do
                 if x ~= 0 or y ~= 0 then
                     i = i + 1
-                    quads[i] = love.graphics.newQuad(x, y, tileSize, tileSize, img)
+                    Quads[i] = love.graphics.newQuad(x, y, TileSize, TileSize, Img)
                 end
             end
         end
 
-        sfx = {}
-        sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
-        sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
-        ship = {}
-        ship.sprite = 2
-        flameSpr = 5
-        lives = 3
-        stars = {}
-        enemies = {}
-        shootOK = true
-        switchOK = true
-        shotType = 1
-        shotTypes = {16, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
-        shots = {}
-        buttonReady = false
-        blinkT = 1
-        mode = "START"
-        printScreenReleased = false
-        invulnerableMax = 60
-        shotTimeoutMax = 10
-
+        Sfx = {}
+        Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
+        Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
+        Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
+        Ship = {}
+        Ship.sprite = 2
+        FlameSpr = 5
+        Lives = 3
+        Stars = {}
+        Enemies = {}
+        ShootOK = true
+        SwitchOK = true
+        ShotType = 1
+        ShotTypes = {16, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
+        Shots = {}
+        ButtonReady = false
+        BlinkT = 1
+        Mode = "START"
+        PrintScreenReleased = false
+        InvulnerableMax = 60
+        ShotTimeoutMax = 4
+        BlinkTimeoutMax = 2
+        T = 0
         local enemy = {}
+        Particles = {}
     end
 end
 
@@ -92,16 +127,16 @@ end
 function love.draw()
     -- scale to Pico-8 screen size
     love.graphics.push()
-    love.graphics.scale(screenScale, screenScale)
+    love.graphics.scale(ScreenScale, ScreenScale)
     
-    if mode == "GAME" then
-        drawGame()
-    elseif mode == "GET_READY" then
-        drawGetReady()
-    elseif mode == "START" then
-        drawStart()
-    elseif mode == "OVER" then
-        drawOver()
+    if Mode == "GAME" then
+        DrawGame()
+    elseif Mode == "GET_READY" then
+        DrawGetReady()
+    elseif Mode == "START" then
+        DrawStart()
+    elseif Mode == "OVER" then
+        DrawOver()
     end
 
     -- restore screen size
@@ -120,73 +155,39 @@ end
 
 --- _UPDATE in PICO-8, Hard 30 FPS
 function love.update(dt)
-    blinkT = blinkT + 1
-    if mode == "GAME" then
-        updateGame(dt)
-    elseif mode == "GET_READY" then
-        updateGetReady(dt)
-    elseif mode == "START" then
+    BlinkT = BlinkT + 1
+    T = T + 1
+    if Mode == "GAME" then
+        UpdateGame(dt)
+    elseif Mode == "GET_READY" then
+        UpdateGetReady(dt)
+    elseif Mode == "START" then
         -- Start Screen
-        updateStart(dt)
-    elseif mode == "OVER" then
+        UpdateStart(dt)
+    elseif Mode == "OVER" then
         -- Game Over Screen
-        updateOver(dt)
+        UpdateOver(dt)
     end
     if love.keyboard.isDown("p") then
-        if printScreenReleased then
-            printScreenReleased = false
+        if PrintScreenReleased then
+            PrintScreenReleased = false
             love.graphics.captureScreenshot("screenshot" .. os.time() .. ".png")
         end
     else
-        printScreenReleased = true
+        PrintScreenReleased = true
     end
 end
 
-function addShot(x, y)
-    shot = {}
-    shot.x = x
-    shot.y = y
-    shot.sprite = shotTypes[shotType]
-    shot.shotType = shotType
-    shot.sx = 0
-    shot.sy = -4
-    shot.lifetime = 300
-
-    if shotType == 2 then
-        shot.lifetime = 7
-    end
-
-    if shotType == 4 then
-        shot.amplitude = 1
-        shot.time = 0.0
-    end
-
-    if shotType == 3 then
-        for angle = 60, 120, 10 do
-            newShot = {}
-            for key, value in pairs(shot) do
-                newShot[key] = value
-            end
-
-            newShot.sx = math.cos(math.rad(angle)) * 4
-            newShot.sy = math.sin(math.rad(angle)) * -4
-            table.insert(shots, newShot)
-        end
-    else
-        table.insert(shots, shot)
-    end
-end
-
-function addEnemy(prototype)
+function AddEnemy(prototype)
     local enemy = {}
     for key, value in pairs(prototype) do
         enemy[key] = value
     end
     if enemy.x == nil then
-        enemy.x = (screenW - tileSize) / 2
+        enemy.x = (ScreenW - TileSize) / 2
     end
     if enemy.y == nil then
-        enemy.y = -1 * tileSize
+        enemy.y = -1 * TileSize
     end
 
     if enemy.sx == nil then
@@ -213,20 +214,76 @@ function addEnemy(prototype)
 
     enemy.time = 0
     enemy.visible = false
+    enemy.blink = 0
     enemy.dead = false
 
-    table.insert(enemies, enemy)
+    table.insert(Enemies, enemy)
 end
 
-function blink()
-    local blinkAni = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 8, 8, 7, 7, 6, 6}
-    if blinkT > #blinkAni then
-        blinkT = 1
+function AddExplosion(centerX,centerY)
+    local speed = 3
+    for ang=0, 359, 30 do
+        local rad = math.rad(ang)
+        AddParticle(centerX, centerY, speed * math.cos(rad), speed * math.sin(rad), 8, 10, 3)
     end
-    return blinkAni[blinkT]
 end
 
-function bounce(x, dx, maxX)
+function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
+    local particle = {}
+    particle.x = x
+    particle.y = y
+    particle.sx = sx
+    particle.sy = sy
+    particle.lifeTime = lifeTime
+    particle.clr = clr
+    particle.radius = radius
+    table.insert(Particles, particle)
+end
+
+function AddShot(x, y)
+    local shot = {}
+    shot.x = x
+    shot.y = y
+    shot.sprite = ShotTypes[ShotType]
+    shot.ShotType = ShotType
+    shot.sx = 0
+    shot.sy = -4
+    shot.lifetime = 300
+
+    if ShotType == 2 then
+        shot.lifetime = 7
+    end
+
+    if ShotType == 4 then
+        shot.amplitude = 1
+        shot.time = 0.0
+    end
+
+    if ShotType == 3 then
+        for angle = 60, 120, 10 do
+            local newShot = {}
+            for key, value in pairs(shot) do
+                newShot[key] = value
+            end
+
+            newShot.sx = math.cos(math.rad(angle)) * 4
+            newShot.sy = math.sin(math.rad(angle)) * -4
+            table.insert(Shots, newShot)
+        end
+    else
+        table.insert(Shots, shot)
+    end
+end
+
+function Blink()
+    local blinkAni = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 8, 8, 7, 7, 6, 6}
+    if BlinkT > #blinkAni then
+        BlinkT = 1
+    end
+    return blinkAni[BlinkT]
+end
+
+function Bounce(x, dx, maxX)
     x = x + dx
     if x < 0 then
         x = 0
@@ -240,13 +297,13 @@ function bounce(x, dx, maxX)
     return x, dx
 end
 
-function clamp(value, minValue, maxValue)
+function Clamp(value, minValue, maxValue)
     return math.max(minValue, math.min(maxValue, value))
 end
 
-function collide(a, b)
-    local x1, y1, w1, h1 = quads[math.floor(a.sprite)]:getViewport()
-    local x2, y2, w2, h2 = quads[math.floor(b.sprite)]:getViewport()
+function Collide(a, b)
+    local x1, y1, w1, h1 = Quads[math.floor(a.sprite)]:getViewport()
+    local x2, y2, w2, h2 = Quads[math.floor(b.sprite)]:getViewport()
     if a.y >= b.y + h2 - 1 then
         return false
      end

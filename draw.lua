@@ -1,82 +1,101 @@
-function drawGame()
-    love.graphics.clear(pal[1])
-    drawStarfield()
+function DrawGame()
+    love.graphics.clear(Pal[1])
+    DrawStarfield()
+
+    -- Draw Particles
+    for key, particle in pairs(Particles) do
+        love.graphics.setColor(Pal[particle.clr])
+        love.graphics.circle("fill", particle.x, particle.y, particle.radius)
+    end
 
     -- Draw Enemies
-    for key, enemy in pairs(enemies) do
-        drawSprite(enemy)
+    for key, enemy in pairs(Enemies) do
+        if enemy.blink > 0 then
+            love.graphics.setShader(RecolorShader)
+        end
+        DrawSprite(enemy)
+        if enemy.blink > 0 then
+            love.graphics.setShader()
+        end
     end        
+    
 
     -- Draw Bullets
-    for key, shot in ipairs(shots) do
-        if shot.shotType == 2 then --laser
-            y = shot.y
-            while y > -1 * tileSize do
-                spr(shot.sprite, shot.x, y)
-                y = y - tileSize
+    for key, shot in ipairs(Shots) do
+        if shot.ShotType == 2 then --laser
+            local y = shot.y
+            while y > -1 * TileSize do
+                Spr(shot.sprite, shot.x, y)
+                y = y - TileSize
             end
         else
-            drawSprite(shot)
+            DrawSprite(shot)
         end
     end
-    if ship.invulnerable <= 0 or ship.invulnerable % 2 == 1 then
-        drawSprite(ship)
+    if Ship.invulnerable <= 0 then
+        DrawSprite(Ship)
         --spr(ship.sprite, ship.x, ship.y)
-        spr(flameSpr, ship.x, ship.y + tileSize)
+        Spr(FlameSpr, Ship.x, Ship.y + TileSize)
+    else
+        if math.sin(T / 1.5) < 0 then
+            DrawSprite(Ship)
+            --spr(ship.sprite, ship.x, ship.y)
+            Spr(FlameSpr, Ship.x, Ship.y + TileSize)
+        end
     end
-    if muzzle > 0 then
-        love.graphics.setColor(pal[7])
-        love.graphics.circle("fill", ship.x + 4, ship.y - 2, muzzle)
+    if Muzzle > 0 then
+        love.graphics.setColor(Pal[7])
+        love.graphics.circle("fill", Ship.x + 4, Ship.y - 2, Muzzle)
     end
     
-    love.graphics.setColor(pal[12])
-    love.graphics.print("SCORE: " .. score, 40, 1)
+    love.graphics.setColor(Pal[12])
+    love.graphics.print("Score: " .. Score, 40, 1)
     -- Lives
     for i=1,4 do
-        if lives >= i then
-            spr(13, i * 9 - 8, 1)
+        if Lives >= i then
+            Spr(13, i * 9 - 8, 1)
         else
-            spr(14, i * 9 - 8, 1)
+            Spr(14, i * 9 - 8, 1)
         end
     end
 end
 
-function drawGetReady()
+function DrawGetReady()
     local clr = 9
     local countDown = 3
-    love.graphics.clear(pal[4])
-    for x = 0, screenW, tileSize do
-        spr(104, x, 0)
-        spr(104, x, screenH - tileSize)
+    love.graphics.clear(Pal[4])
+    for x = 0, ScreenW, TileSize do
+        Spr(104, x, 0)
+        Spr(104, x, ScreenH - TileSize)
     end
-    for y = tileSize, screenH - tileSize, tileSize do
-        spr(104, 0, y)
-        spr(104, screenW - tileSize, y)
+    for y = TileSize, ScreenH - TileSize, TileSize do
+        Spr(104, 0, y)
+        Spr(104, ScreenW - TileSize, y)
     end
 
-    centerPrint("GET READY", 40, 13)
-    if getReadyTime < 1.0 then
+    CenterPrint("GET READY", 40, 13)
+    if GetReadyTime < 1.0 then
         clr = 9
         countDown = 3
-    elseif getReadyTime < 2.0 then
+    elseif GetReadyTime < 2.0 then
         clr = 10
         countDown = 2
-    elseif getReadyTime < 3.0 then
+    elseif GetReadyTime < 3.0 then
         clr = 12
         countDown = 1
     else
         clr = 16
         countDown = "GO!"
     end
-    centerPrint(countDown, 60, clr)
+    CenterPrint(countDown, 60, clr)
 end
 
-function drawSprite(sprite)
-    spr(math.floor(sprite.sprite), sprite.x, sprite.y)
+function DrawSprite(sprite)
+    Spr(math.floor(sprite.sprite), sprite.x, sprite.y)
 end
 
-function drawStarfield()
-    for key, star in ipairs(stars) do
+function DrawStarfield()
+    for key, star in ipairs(Stars) do
         local clr = 8
 
         if star.spd < 1 then
@@ -88,75 +107,75 @@ function drawStarfield()
         end
         
         if star.spd < 1.5 then
-            pset(star.x, star.y, clr)
+            Pset(star.x, star.y, clr)
         else
-            line(star.x, star.y - 3, star.x, star.y, 6)
-            line(star.x, star.y - 1, star.x, star.y, clr)
+            Line(star.x, star.y - 3, star.x, star.y, 6)
+            Line(star.x, star.y - 1, star.x, star.y, clr)
         end
     end
 end
 
-function drawOver()
-    love.graphics.clear(pal[9])
-    love.graphics.setColor(pal[3])
-    for y=0,screenH,tileSize do
-        for x = 0,screenW,tileSize do
-            if ((x/tileSize) + (y/tileSize)) % 2 == 1 then
-                love.graphics.rectangle("fill", x, y, tileSize, tileSize)
+function DrawOver()
+    love.graphics.clear(Pal[9])
+    love.graphics.setColor(Pal[3])
+    for y=0,ScreenH,TileSize do
+        for x = 0,ScreenW,TileSize do
+            if ((x/TileSize) + (y/TileSize)) % 2 == 1 then
+                love.graphics.rectangle("fill", x, y, TileSize, TileSize)
             end
         end
     end
-    spr(108, 10, 10)
-    spr(108, screenW - tileSize - 10, 10)
-    spr(108, 10, screenH - tileSize - 10)
-    spr(108, screenW - tileSize - 10, screenH - tileSize - 10)
+    Spr(108, 10, 10)
+    Spr(108, ScreenW - TileSize - 10, 10)
+    Spr(108, 10, ScreenH - TileSize - 10)
+    Spr(108, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
-    centerPrint("GAME OVER", 40, 8)
-    centerPrint("Press any key to continue", 80, blink())
+    CenterPrint("GAME OVER", 40, 8)
+    CenterPrint("Press any key to continue", 80, Blink())
 end
 
-function drawStart()
-    love.graphics.clear(pal[2])
-    local x = screenW / 2
-    local y = screenH / 2
-    love.graphics.setColor(pal[3])
-    maxRadius = math.sqrt((screenW/2)^2 + (screenH/2)^2)
-    for radius = 10, maxRadius, 10 do
+function DrawStart()
+    love.graphics.clear(Pal[2])
+    local x = ScreenW / 2
+    local y = ScreenH / 2
+    love.graphics.setColor(Pal[3])
+    MaxRadius = math.sqrt((ScreenW/2)^2 + (ScreenH/2)^2)
+    for radius = 10, MaxRadius, 10 do
         love.graphics.circle("line", x, y, radius)
     end
-    radius = math.max(screenW / 2, screenH / 2)
-    offset = (love.timer.getTime() * 25) % 360
+    local radius = math.max(ScreenW / 2, ScreenH / 2)
+    local offset = (love.timer.getTime() * 25) % 360
     for angle = 0, 360, 15 do
-        line(x, y, x + (maxRadius * math.cos(math.rad(angle + offset))), y + (maxRadius * math.sin(math.rad(angle + offset))), 3)
+        Line(x, y, x + (MaxRadius * math.cos(math.rad(angle + offset))), y + (MaxRadius * math.sin(math.rad(angle + offset))), 3)
     end
     
-    spr(106, 10, 10)
-    spr(107, screenW - tileSize - 10, 10)
-    spr(106, 10, screenH - tileSize - 10)
-    spr(107, screenW - tileSize - 10, screenH - tileSize - 10)
+    Spr(106, 10, 10)
+    Spr(107, ScreenW - TileSize - 10, 10)
+    Spr(106, 10, ScreenH - TileSize - 10)
+    Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
-    centerPrint("My Awesome Shmup", 40, 13)
-    centerPrint("Press any key to start", 80, blink())
+    CenterPrint("My Awesome Shmup", 40, 13)
+    CenterPrint("Press any key to start", 80, Blink())
 end
 
-function line(x1, y1, x2, y2, clr)
-    love.graphics.setColor(pal[clr])
+function Line(x1, y1, x2, y2, clr)
+    love.graphics.setColor(Pal[clr])
     love.graphics.line(x1, y1, x2, y2)
 end
 
-function centerPrint(message, y, clr)
-    love.graphics.setColor(pal[clr])
-    x = (screenW - font8:getWidth(message)) / 2
+function CenterPrint(message, y, clr)
+    love.graphics.setColor(Pal[clr])
+    local x = (ScreenW - Font8:getWidth(message)) / 2
     love.graphics.print(message, x, y)
 end
 
-function pset(x, y, clr)
+function Pset(x, y, clr)
     -- love.graphics.points doesn't scale up properly so I am drawing rectangles.
-    love.graphics.setColor(pal[clr])
+    love.graphics.setColor(Pal[clr])
     love.graphics.rectangle("fill", x, y, 1, 1)
 end
 
-function spr(id, x, y)
-    love.graphics.setColor(white)
-    love.graphics.draw(img, quads[id], x, y)
+function Spr(id, x, y)
+    love.graphics.setColor(White)
+    love.graphics.draw(Img, Quads[id], x, y)
 end
