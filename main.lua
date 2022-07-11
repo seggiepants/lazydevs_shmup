@@ -6,14 +6,15 @@ require "draw"
 require "update"
 
 -- To Do:
--- Explosions, enemy just dissapearing is bad
--- Hit Reaction
+-- Procedurally Generated Explosions
+-- Bullet Collision FX
 
 -- DoggieZone
--- 1. Color Swap enemies, green alien -> blue alien for example.
--- 2. Player Ship color flash on hit (not just blink)
--- 3. Bullet dissapate on destroy animation.
-
+-- 1. Particles to go with the clouds in an explosion.
+-- . or lines
+-- . or shockwaves
+-- . or sprite particle explosion (I chose lines, I know shockwaves are coming and didn't want to do more art)
+-- 2. Player explode on death (no color difference but done, added a timeout so you can see it)
 
 -- _INIT() in Pico-8
 function love.load()
@@ -124,11 +125,15 @@ function love.load()
                 end
             end
         end
+        --[[
+            -- Update big sprite quads.
         SprExplosion = 48
         local x, y, w, h = Quads[SprExplosion]:getViewport()
         for i = 0, 4 do
             Quads[SprExplosion + i]:setViewport(x + (w * i * 2), y, w * 2, h * 2, imgW, imgH)
         end
+        ]]--
+
         Sfx = {}
         Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
         Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
@@ -140,9 +145,7 @@ function love.load()
         Lives = 3
         Stars = {}
         Enemies = {}
-        Explosions = {}
         Particles = {}
-        ExplosionFrames = {SprExplosion, SprExplosion, SprExplosion + 1, SprExplosion + 2, SprExplosion + 3, SprExplosion + 3, SprExplosion + 4}
         ShootOK = true
         SwitchOK = true
         ShotType = 1
@@ -258,12 +261,60 @@ function AddEnemy(prototype)
 end
 
 function AddExplosion(centerX,centerY)
+    --[[
     local explosion = {}
     local x, y, w, h = Quads[SprExplosion]:getViewport()
     explosion.age = 1
     explosion.x = centerX - (w / 2)
     explosion.y = centerY - (h / 2)
     table.insert(Explosions, explosion)
+    ]]--
+    -- center
+    local particle = {}
+    particle.isExplosion = true
+    particle.x = centerX
+    particle.y = centerY
+    particle.radius = 8
+    particle.clr = 8
+    particle.sx = 0
+    particle.sy = 0
+    particle.age = 0
+    particle.maxAge = 10
+    table.insert(Particles, particle)
+    -- beams
+    local speed = 1.5
+    local clrs = {10, 11, 8, 15}
+    for ang=0, 359, 30 do
+        local rad = math.rad(ang)
+        local particle = {}
+        particle.x = centerX
+        particle.y = centerY
+        particle.startX = particle.x
+        particle.startY = particle.y
+        particle.sx = speed * math.cos(rad)
+        particle.sy = speed * math.sin(rad)
+        particle.age = 0
+        particle.maxAge = 20
+        particle.radius = 100
+        particle.clr = clrs[love.math.random(1, #clrs)]
+        particle.radius = 1
+        particle.isBeam = true
+        table.insert(Particles, particle)
+    end
+    -- clouds
+    for i = 1, 30 do
+        local particle = {}
+        particle.isExplosion = true
+        particle.x = centerX
+        particle.y = centerY
+        particle.radius = 1 + love.math.random(4)
+        particle.clr = 8
+        particle.sx = (love.math.random() - 0.5) * 3
+        particle.sy = (love.math.random() - 0.5) * 3
+        particle.age = love.math.random(2)
+        particle.maxAge = 20 + love.math.random(20)
+        table.insert(Particles, particle)
+    end
 end
 
 function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
@@ -272,7 +323,8 @@ function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
     particle.y = y
     particle.sx = sx
     particle.sy = sy
-    particle.lifeTime = lifeTime
+    particle.age = 0
+    particle.maxAge = lifeTime
     particle.clr = clr
     particle.radius = radius
     table.insert(Particles, particle)
@@ -286,10 +338,11 @@ function AddShot(x, y)
     shot.ShotType = ShotType
     shot.sx = 0
     shot.sy = -4
-    shot.lifetime = 300
+    shot.age = 0
+    shot.maxAge = 300
 
     if ShotType == 2 then
-        shot.lifetime = 7
+        shot.maxAge = 7
     end
 
     if ShotType == 4 then

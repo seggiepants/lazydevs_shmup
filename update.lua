@@ -31,16 +31,18 @@ function UpdateGame(dt)
         ShootOK = true
     end
     
-    if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
-        if ShootOK then
-            AddShot(Ship.x, Ship.y - (TileSize / 2))
-            love.audio.play(Sfx["laser"])
-            Muzzle = 6
-            ShootOK = false
-            Ship.shotTimeout = ShotTimeoutMax
+    if Ship.dead == false then
+        if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
+            if ShootOK then
+                AddShot(Ship.x, Ship.y - (TileSize / 2))
+                love.audio.play(Sfx["laser"])
+                Muzzle = 6
+                ShootOK = false
+                Ship.shotTimeout = ShotTimeoutMax
+            end
+        else
+            ShootOK = true
         end
-    else
-        ShootOK = true
     end
 
     if love.keyboard.isDown("tab") == false and 
@@ -63,29 +65,63 @@ function UpdateGame(dt)
     end
     
     -- Moving the ship
-    Ship.x = Ship.x + Ship.sx
-    Ship.y = Ship.y + Ship.sy
+    if Ship.dead == false then
+        Ship.x = Ship.x + Ship.sx
+        Ship.y = Ship.y + Ship.sy
 
-    if Ship.x < 0 then
-        Ship.x = 0
-    elseif Ship.x >= ScreenW - TileSize then
-        Ship.x = ScreenW - TileSize
-    end
+        if Ship.x < 0 then
+            Ship.x = 0
+        elseif Ship.x >= ScreenW - TileSize then
+            Ship.x = ScreenW - TileSize
+        end
 
-    if Ship.y < 0 then
-        Ship.y = 0
-    elseif Ship.y > ScreenH - TileSize then
-        Ship.y = ScreenH - TileSize
+        if Ship.y < 0 then
+            Ship.y = 0
+        elseif Ship.y > ScreenH - TileSize then
+            Ship.y = ScreenH - TileSize
+        end
+    else
+        Ship.deadTime = Ship.deadTime + 1
     end
 
     -- Move particles
     for i = #Particles, 1, -1 do
         local particle = Particles[i]
+
         particle.x = particle.x + particle.sx
         particle.y = particle.y + particle.sy
-        particle.lifeTime = particle.lifeTime - 1
-        if particle.lifeTime <= 0 then
-            table.remove(Particles, i)
+
+        if particle.isBeam and particle.age > 10 then
+            particle.isBeam = nil
+        end
+
+        if particle.isExplosion then
+            particle.sx = particle.sx * 0.9
+            particle.sy = particle.sy * 0.9
+            particle.clr = 8
+            if particle.age > 10 then -- 5 then
+                particle.clr = 11
+            end
+            if particle.age > 14 then --7 then
+                particle.clr = 10
+            end
+            if particle.age > 20 then --10 then
+                particle.clr = 9
+            end
+            if particle.age > 24 then --12 then
+                particle.clr = 3
+            end
+            if particle.age > 30 then --15 then
+                particle.clr = 6
+            end
+        end
+
+        particle.age = particle.age + 1
+        if particle.age >= particle.maxAge then
+            particle.radius = particle.radius - 0.5
+            if particle.radius <= 0  or particle.isExplosion == nil then
+                table.remove(Particles, i)
+            end
         end
     end
 
@@ -100,13 +136,14 @@ function UpdateGame(dt)
             shot.x = shot.x + shot.sx
         end
         shot.y = shot.y + shot.sy
-        if shot.lifetime < 0 or 
+        if shot.age >= shot.maxAge or 
             shot.y < -1 * TileSize or
             shot.y > ScreenH + TileSize or
             shot.x < -1 * TileSize or
             shot.x > ScreenW + TileSize then
             table.remove(Shots, i)
         end
+        shot.age = shot.age + 1
     end
 
     -- Move the enemies
@@ -128,6 +165,7 @@ function UpdateGame(dt)
     end
 
     -- Update Explosions
+    --[[
     for i = #Explosions, 1, -1 do
         local explosion = Explosions[i]
         explosion.age = explosion.age + 0.5
@@ -135,7 +173,8 @@ function UpdateGame(dt)
             table.remove(Explosions, i)
         end
     end
-
+    ]]--
+    
     -- Spawn new enemies
     PreviousTime = Time
     Time = Time + dt
@@ -155,7 +194,6 @@ function UpdateGame(dt)
         if ColorIndex > #PalGreenAlien then
             ColorIndex = 1
         end
-        print("New Color Index: " .. ColorIndex)
     end
 
     -- Collision Enemies x Shots
@@ -191,6 +229,11 @@ function UpdateGame(dt)
                 Ship.invulnerable = InvulnerableMax
                 love.audio.play(Sfx["hurt"])
                 table.remove(Enemies, i)
+                if Lives <= 0 and Ship.dead == false then
+                    Ship.dead = true
+                    Ship.deadTime = 0
+                    AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2))
+                end
             end
         end
     end
@@ -203,7 +246,7 @@ function UpdateGame(dt)
     -- Animate the star field
     UpdateStarfield()
 
-    if Lives <= 0 then
+    if Lives <= 0 and Ship.deadTime >= Ship.maxDeadTime then
         Mode = "OVER"
     end
 end
@@ -270,6 +313,9 @@ function StartGame()
     Ship.sprite = 2
     Ship.invulnerable = 0
     Ship.shotTimeout = 0
+    Ship.dead = false
+    Ship.deadTime = 0
+    Ship.maxDeadTime = 45
     FlameSpr = 5
     Muzzle = 0
     Score = 0

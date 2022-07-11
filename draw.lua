@@ -2,19 +2,15 @@ function DrawGame()
     love.graphics.clear(Pal[1])
     DrawStarfield()
 
-    -- Draw Explosions
-    for key, explosion in pairs(Explosions) do
-        local frame = explosion.age
-        frame = math.floor(frame)
-        frame = ExplosionFrames[frame]
-        --print(frame)
-        Spr(frame, explosion.x, explosion.y)
-    end
-
     -- Draw Particles
     for key, particle in pairs(Particles) do
         love.graphics.setColor(Pal[particle.clr])
-        love.graphics.circle("fill", particle.x, particle.y, particle.radius)
+        if particle.isBeam then
+            love.graphics.line(particle.startX, particle.startY, particle.x, particle.y)
+        else
+            love.graphics.circle("fill", particle.x, particle.y, particle.radius)
+        end
+        --Pset(particle.x, particle.y, 8) --particle.clr)
     end
 
     -- Draw Enemies
@@ -45,29 +41,31 @@ function DrawGame()
             DrawSprite(shot)
         end
     end
-    if Ship.invulnerable <= 0 then
-        DrawSprite(Ship)
-        --spr(ship.sprite, ship.x, ship.y)
-        Spr(FlameSpr, Ship.x, Ship.y + TileSize)
-    else
-        if T % 6 >= 3 then
-            if T % 2 == 1 then
-                RecolorShader:send("Target", unpack(PalWhite)) 
-                love.graphics.setShader(RecolorShader)
-            end
+
+    if Ship.dead == false then
+        if Ship.invulnerable <= 0 then
             DrawSprite(Ship)
-            if T % 2 == 1 then
-                love.graphics.setShader()
-            end
             --spr(ship.sprite, ship.x, ship.y)
             Spr(FlameSpr, Ship.x, Ship.y + TileSize)
+        else
+            if T % 6 >= 3 then
+                if T % 2 == 1 then
+                    RecolorShader:send("Target", unpack(PalWhite)) 
+                    love.graphics.setShader(RecolorShader)
+                end
+                DrawSprite(Ship)
+                if T % 2 == 1 then
+                    love.graphics.setShader()
+                end
+                --spr(ship.sprite, ship.x, ship.y)
+                Spr(FlameSpr, Ship.x, Ship.y + TileSize)
+            end
+        end
+        if Muzzle > 0 then
+            love.graphics.setColor(Pal[7])
+            love.graphics.circle("fill", Ship.x + 4, Ship.y - 2, Muzzle)
         end
     end
-    if Muzzle > 0 then
-        love.graphics.setColor(Pal[7])
-        love.graphics.circle("fill", Ship.x + 4, Ship.y - 2, Muzzle)
-    end
-    
     love.graphics.setColor(Pal[12])
     love.graphics.print("Score: " .. Score, 40, 1)
     -- Lives
