@@ -122,18 +122,40 @@ function UpdateGame(dt)
         if enemy.y > ScreenH then
             table.remove(Enemies, i)
         end
-        if enemy.blink > 0 then
-            enemy.blink = enemy.blink - 1
+        if enemy.flash > 0 then
+            enemy.flash = enemy.flash - 1
+        end
+    end
+
+    -- Update Explosions
+    for i = #Explosions, 1, -1 do
+        local explosion = Explosions[i]
+        explosion.age = explosion.age + 0.5
+        if explosion.age > #ExplosionFrames then
+            table.remove(Explosions, i)
         end
     end
 
     -- Spawn new enemies
     PreviousTime = Time
     Time = Time + dt
-    for i, enemy in pairs(LevelJson["enemies"]) do
+    local maxTime = 0
+    for i, enemy in pairs(LevelJson["enemies"]) do 
+        maxTime = math.max(maxTime, enemy.time)
         if enemy.time >= PreviousTime and enemy.time < Time then
             AddEnemy(enemy)
         end
+    end
+
+    -- Debug, replay the wave
+    if #Enemies == 0 and Time > maxTime then
+        PreviousTime = -1
+        Time = 0
+        ColorIndex = ColorIndex + 1
+        if ColorIndex > #PalGreenAlien then
+            ColorIndex = 1
+        end
+        print("New Color Index: " .. ColorIndex)
     end
 
     -- Collision Enemies x Shots
@@ -141,15 +163,19 @@ function UpdateGame(dt)
         local enemy = Enemies[i]
         for j = #Shots, 1, -1 do
             if Collide(enemy, Shots[j]) then
-                love.audio.play(Sfx["enemyHit"])
-                enemy.blink = BlinkTimeoutMax
+                local shot = Shots[j]
+                AddShotSpray(shot.x + (TileSize / 2), shot.y + (TileSize / 2))
                 table.remove(Shots, j)
                 enemy.hp = enemy.hp - 1
+                enemy.flash = FlashTimeoutMax
                 if enemy.hp <= 0 then
+                    love.audio.play(Sfx["enemyHit"])
                     local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
                     AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2))
                     table.remove(Enemies, i)
                     Score = Score + 1
+                else
+                    love.audio.play(Sfx["enemyShieldHit"])
                 end
             end     
         end

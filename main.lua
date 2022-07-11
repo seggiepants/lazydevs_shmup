@@ -10,8 +10,9 @@ require "update"
 -- Hit Reaction
 
 -- DoggieZone
--- 1. Explosions - Sprite animation, or circle animation
--- 2. Maybe color flash white
+-- 1. Color Swap enemies, green alien -> blue alien for example.
+-- 2. Player Ship color flash on hit (not just blink)
+-- 3. Bullet dissapate on destroy animation.
 
 
 -- _INIT() in Pico-8
@@ -51,6 +52,34 @@ function love.load()
         , {255/255, 119/255, 168/255, 1.0}
         , {255/255, 204/255, 170/255, 1.0}}
 
+        PalWhite = {Pal[8], Pal[8], Pal[8], Pal[8],
+                    Pal[8], Pal[8], Pal[8], Pal[8],
+                    Pal[8], Pal[8], Pal[8], Pal[8],
+                    Pal[8], Pal[8], Pal[8], Pal[8],
+                }
+        
+        -- Normal (green), Red, Blue
+        PalGreenAlien = {
+            {
+                Pal[1], Pal[2], Pal[3], Pal[4],
+                Pal[5], Pal[6], Pal[7], Pal[8],
+                Pal[9], Pal[10], Pal[11], Pal[12],
+                Pal[13], Pal[14], Pal[15], Pal[16]
+            }, 
+            {
+                Pal[1], Pal[2], Pal[3], Pal[3],
+                Pal[5], Pal[6], Pal[7], Pal[8],
+                Pal[9], Pal[10], Pal[11], Pal[9],
+                Pal[13], Pal[14], Pal[15], Pal[16]
+            },
+            {
+                Pal[1], Pal[2], Pal[3], Pal[2],
+                Pal[5], Pal[6], Pal[7], Pal[8],
+                Pal[9], Pal[10], Pal[11], Pal[13],
+                Pal[13], Pal[14], Pal[15], Pal[16]
+            },
+        }
+
         -- Shader stolen from the love2d.org forums by s-ol
         RecolorShader = love.graphics.newShader(
             [[
@@ -61,15 +90,16 @@ function love.load()
                 }
                 #endif
                 #ifdef PIXEL
-                extern vec4 Pal[15]; // size of color palette (16 colors)
+                extern vec4 Pal[16]; // size of color palette (16 colors)
+                extern vec4 Target[16];
                 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
                 {
                     vec4 pixel = Texel(texture, texture_coords);
-                    for(int i = 0; i < 15; i++)
+                    for(int i = 0; i < 16; i++)
                     {
                         if (pixel == Pal[i])
                         {
-                            return vec4(1.0, 1.0, 1.0, 1.0);
+                            return Target[i];
                         }
                     }
                     return pixel;
@@ -77,7 +107,7 @@ function love.load()
                 #endif
             ]]
         )
-        RecolorShader:send("Pal", Pal[2], Pal[3], Pal[4], Pal[5], Pal[6], Pal[7], Pal[8], Pal[9], Pal[10], Pal[11], Pal[12], Pal[13], Pal[14], Pal[15])
+        RecolorShader:send("Pal", unpack(Pal)) -- Pal[2], Pal[3], Pal[4], Pal[5], Pal[6], Pal[7], Pal[8], Pal[9], Pal[10], Pal[11], Pal[12], Pal[13], Pal[14], Pal[15])
 
         local levelTxt = love.filesystem.read("/levels/level.json")
         LevelJson = Json.decode(levelTxt)
@@ -94,17 +124,25 @@ function love.load()
                 end
             end
         end
-
+        SprExplosion = 48
+        local x, y, w, h = Quads[SprExplosion]:getViewport()
+        for i = 0, 4 do
+            Quads[SprExplosion + i]:setViewport(x + (w * i * 2), y, w * 2, h * 2, imgW, imgH)
+        end
         Sfx = {}
         Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
         Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
         Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
+        Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
         Ship = {}
         Ship.sprite = 2
         FlameSpr = 5
         Lives = 3
         Stars = {}
         Enemies = {}
+        Explosions = {}
+        Particles = {}
+        ExplosionFrames = {SprExplosion, SprExplosion, SprExplosion + 1, SprExplosion + 2, SprExplosion + 3, SprExplosion + 3, SprExplosion + 4}
         ShootOK = true
         SwitchOK = true
         ShotType = 1
@@ -116,10 +154,9 @@ function love.load()
         PrintScreenReleased = false
         InvulnerableMax = 60
         ShotTimeoutMax = 4
-        BlinkTimeoutMax = 2
+        FlashTimeoutMax = 2
         T = 0
-        local enemy = {}
-        Particles = {}
+        ColorIndex = 2
     end
 end
 
@@ -214,18 +251,19 @@ function AddEnemy(prototype)
 
     enemy.time = 0
     enemy.visible = false
-    enemy.blink = 0
+    enemy.flash = 0
     enemy.dead = false
 
     table.insert(Enemies, enemy)
 end
 
 function AddExplosion(centerX,centerY)
-    local speed = 3
-    for ang=0, 359, 30 do
-        local rad = math.rad(ang)
-        AddParticle(centerX, centerY, speed * math.cos(rad), speed * math.sin(rad), 8, 10, 3)
-    end
+    local explosion = {}
+    local x, y, w, h = Quads[SprExplosion]:getViewport()
+    explosion.age = 1
+    explosion.x = centerX - (w / 2)
+    explosion.y = centerY - (h / 2)
+    table.insert(Explosions, explosion)
 end
 
 function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
@@ -272,6 +310,15 @@ function AddShot(x, y)
         end
     else
         table.insert(Shots, shot)
+    end
+end
+
+function AddShotSpray(centerX,centerY)
+    local speed = 1
+    local clrs = {10, 11, 8, 15}
+    for ang=0, 359, 60 do
+        local rad = math.rad(ang)
+        AddParticle(centerX, centerY, speed * math.cos(rad), speed * math.sin(rad), 8, clrs[love.math.random(1, #clrs)], 1)
     end
 end
 

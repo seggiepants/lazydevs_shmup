@@ -2,6 +2,15 @@ function DrawGame()
     love.graphics.clear(Pal[1])
     DrawStarfield()
 
+    -- Draw Explosions
+    for key, explosion in pairs(Explosions) do
+        local frame = explosion.age
+        frame = math.floor(frame)
+        frame = ExplosionFrames[frame]
+        --print(frame)
+        Spr(frame, explosion.x, explosion.y)
+    end
+
     -- Draw Particles
     for key, particle in pairs(Particles) do
         love.graphics.setColor(Pal[particle.clr])
@@ -10,11 +19,15 @@ function DrawGame()
 
     -- Draw Enemies
     for key, enemy in pairs(Enemies) do
-        if enemy.blink > 0 then
+        if enemy.flash > 0 then
+            RecolorShader:send("Target", unpack(PalWhite)) 
+            love.graphics.setShader(RecolorShader)
+        elseif enemy.enemyType == "eye" then
+            RecolorShader:send("Target", unpack(PalGreenAlien[ColorIndex])) 
             love.graphics.setShader(RecolorShader)
         end
         DrawSprite(enemy)
-        if enemy.blink > 0 then
+        if enemy.flash > 0 or enemy.enemyType == "eye" then
             love.graphics.setShader()
         end
     end        
@@ -37,8 +50,15 @@ function DrawGame()
         --spr(ship.sprite, ship.x, ship.y)
         Spr(FlameSpr, Ship.x, Ship.y + TileSize)
     else
-        if math.sin(T / 1.5) < 0 then
+        if T % 6 >= 3 then
+            if T % 2 == 1 then
+                RecolorShader:send("Target", unpack(PalWhite)) 
+                love.graphics.setShader(RecolorShader)
+            end
             DrawSprite(Ship)
+            if T % 2 == 1 then
+                love.graphics.setShader()
+            end
             --spr(ship.sprite, ship.x, ship.y)
             Spr(FlameSpr, Ship.x, Ship.y + TileSize)
         end
@@ -62,7 +82,7 @@ end
 
 function DrawGetReady()
     local clr = 9
-    local countDown = 3
+    local countDown = "3"
     love.graphics.clear(Pal[4])
     for x = 0, ScreenW, TileSize do
         Spr(104, x, 0)
@@ -76,13 +96,13 @@ function DrawGetReady()
     CenterPrint("GET READY", 40, 13)
     if GetReadyTime < 1.0 then
         clr = 9
-        countDown = 3
+        countDown = "3"
     elseif GetReadyTime < 2.0 then
         clr = 10
-        countDown = 2
+        countDown = "2"
     elseif GetReadyTime < 3.0 then
         clr = 12
-        countDown = 1
+        countDown = "1"
     else
         clr = 16
         countDown = "GO!"
