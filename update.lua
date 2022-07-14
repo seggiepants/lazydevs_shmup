@@ -164,23 +164,20 @@ function UpdateGame(dt)
     end
     
     -- Spawn new enemies
-    PreviousTime = Time
-    Time = Time + dt
-    local maxTime = 0
-    for i, enemy in pairs(LevelJson["enemies"]) do 
-        maxTime = math.max(maxTime, enemy.time)
-        if enemy.time >= PreviousTime and enemy.time < Time then
-            AddEnemy(enemy)
+    if Mode == "GAME" then
+        PreviousTime = Time
+        Time = Time + dt
+        local maxTime = 0
+        for i, enemy in pairs(LevelJson["enemies"]) do 
+            maxTime = math.max(maxTime, enemy.time)
+            if enemy.time >= PreviousTime and enemy.time < Time then
+                AddEnemy(enemy)
+            end
         end
-    end
 
-    -- Debug, replay the wave
-    if #Enemies == 0 and Time > maxTime then
-        PreviousTime = -1
-        Time = 0
-        ColorIndex = ColorIndex + 1
-        if ColorIndex > #PalGreenAlien then
-            ColorIndex = 1
+        -- Debug, replay the wave
+        if #Enemies == 0 and Time > maxTime then
+            NextWave()
         end
     end
 
@@ -238,7 +235,7 @@ function UpdateGame(dt)
     UpdateStarfield()
 
     if Lives <= 0 and Ship.deadTime >= Ship.maxDeadTime then
-        Mode = "OVER"
+        StartGameOver()
     end
 end
 
@@ -272,7 +269,7 @@ function UpdateOver(dt)
             love.keyboard.isDown("space") or 
             love.keyboard.isDown("z") then
             ButtonReady = false
-            Mode = "START"
+            StartTitle()
         end 
     end
 end
@@ -295,8 +292,42 @@ function UpdateStart(dt)
     end
 end
 
+function UpdateWaveText(dt)
+    UpdateGame(dt)
+    WaveTime = WaveTime - 1
+    if WaveTime <= 0 then
+        Mode = "GAME"
+        local bgm = Music["game"]
+        bgm:setLooping(true)
+        bgm:play()
+        AddEnemyWave()
+    end
+end
+
+function UpdateWin(dt)
+    if love.keyboard.isDown("tab") == false and 
+        love.keyboard.isDown("x") == false and
+        love.keyboard.isDown("space") == false and
+        love.keyboard.isDown("z") == false then
+        ButtonReady = true
+    end
+    if ButtonReady then
+        if love.keyboard.isDown("tab") or 
+            love.keyboard.isDown("x") or
+            love.keyboard.isDown("space") or 
+            love.keyboard.isDown("z") then
+            StartTitle()
+        end 
+    end
+end
+
 function StartGame()
     T = 0
+    Enemies = {}
+    Shots = {}
+    Stars = {}
+    Wave = 0
+    NextWave()
     Ship.x = (ScreenW - TileSize) / 2
     Ship.y = (ScreenH - TileSize) / 2
     Ship.sx = 0
@@ -312,7 +343,6 @@ function StartGame()
     Score = 0
     Lives = 3
     local starClr = {6, 7, 8, 16}
-    Stars = {}
     for i=1,100 do
         local star = {} 
         star.x = love.math.random(ScreenW)
@@ -320,19 +350,45 @@ function StartGame()
         star.spd = (love.math.random() * 1.5) + .05
         table.insert(Stars, star)
     end
-
     ShootOK = true
     SwitchOK = true
     ShotType = 1
-    Shots = {}
     ButtonReady = false
-    Mode = "GAME"
-    Enemies = {}
-    Time = 0
-    PreviousTime = -1.0
+    
+    love.audio.stop()
+    local bgm = Music["game"]
+    bgm:setLooping(true)
+    bgm:play()
+end
+
+function StartGameOver()
+    ButtonReady = false
+    Mode = "OVER"
+    love.audio.stop()
+    local bgm = Music["over"]
+    bgm:setLooping(false)
+    bgm:play()
 end
 
 function StartGetReady()
     GetReadyTime = 0
     Mode = "GET_READY"
+end
+
+function StartTitle()
+    ButtonReady = false
+    Mode = "START"
+    love.audio.stop()
+    local bgm = Music["start"]
+    bgm:setLooping(false)
+    bgm:play()
+end
+
+function StartWin()
+    ButtonReady = false
+    Mode = "WIN"
+    love.audio.stop()
+    local bgm = Music["win"]
+    bgm:setLooping(false)
+    bgm:play()
 end

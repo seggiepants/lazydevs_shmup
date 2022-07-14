@@ -4,18 +4,20 @@ end
 Json = require "lunajson"
 require "draw"
 require "update"
+require "enemies"
 
 -- To Do:
 -- --------------------
--- General Game Flow
--- Music
+-- Wave Logic
+-- Better Music Integration
+-- Nicer Screens
 -- Multiple Enemies
 -- Big Enemies (Boss)
 -- Enemy Shots
 
 -- DoggieZone
--- 1. Create more enemies 3 more (4 total) (already know which are coming up copied the red bat, and spinner, but made a new "boss" big guy)
--- 2. Expand particle effects. (skipped, we have too much at the moment, and I did it previously)
+-- 1. Make your own music
+-- 2. Additional enemies if not done last time.
 
 -- _INIT() in Pico-8
 function love.load()
@@ -145,6 +147,12 @@ function love.load()
         Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
         Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
         Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
+        Music = {}
+        Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
+        Music["game"] = love.audio.newSource("audio/gameplay.xm", "stream")
+        Music["nextwave"] = love.audio.newSource("audio/nextwave.xm", "stream")
+        Music["over"] = love.audio.newSource("audio/lose.xm", "stream")
+        Music["win"] = love.audio.newSource("audio/win.xm", "stream")
         Ship = {}
         Ship.sprite = 2
         FlameSpr = 5
@@ -160,13 +168,14 @@ function love.load()
         Shots = {}
         ButtonReady = false
         BlinkT = 1
-        Mode = "START"
         PrintScreenReleased = false
         InvulnerableMax = 60
         ShotTimeoutMax = 4
         FlashTimeoutMax = 2
         T = 0
-        ColorIndex = 2
+        Wave = 1
+        ColorIndex = 1
+        StartTitle()
     end
 end
 
@@ -182,8 +191,12 @@ function love.draw()
         DrawGetReady()
     elseif Mode == "START" then
         DrawStart()
+    elseif Mode == "WAVETEXT" then
+        DrawWaveText()
     elseif Mode == "OVER" then
         DrawOver()
+    elseif Mode == "WIN" then
+        DrawWin()
     end
 
     -- restore screen size
@@ -211,9 +224,15 @@ function love.update(dt)
     elseif Mode == "START" then
         -- Start Screen
         UpdateStart(dt)
+    elseif Mode == "WAVETEXT" then
+        -- Wave Number Notice
+        UpdateWaveText(dt)
     elseif Mode == "OVER" then
         -- Game Over Screen
         UpdateOver(dt)
+    elseif Mode == "WIN" then
+        -- You won the game
+        UpdateWin(dt)
     end
     if love.keyboard.isDown("p") then
         if PrintScreenReleased then

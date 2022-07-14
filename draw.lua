@@ -194,6 +194,31 @@ function DrawStart()
     CenterPrint("Press any key to start", 80, Blink())
 end
 
+function DrawWaveText()
+    DrawGame()
+    CenterPrint("Wave " .. Wave, 60, Blink())
+end
+
+function DrawWin()
+    love.graphics.clear(Pal[4])
+    love.graphics.setColor(Pal[12])
+    for y=0,ScreenH,TileSize do
+        for x = 0,ScreenW,TileSize do
+            if ((x/TileSize) + (y/TileSize)) % 2 == 1 then
+                love.graphics.rectangle("fill", x, y, TileSize, TileSize)
+            end
+        end
+    end
+    Spr(106, 10, 10)
+    Spr(107, ScreenW - TileSize - 10, 10)
+    Spr(106, 10, ScreenH - TileSize - 10)
+    Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
+    
+    CenterPrint("CONGRATULATIONS!", 40, 8)
+    CenterPrint("YOU WIN", 56, 8)
+    CenterPrint("Press any key to continue", 80, Blink())
+end
+
 function Line(x1, y1, x2, y2, clr)
     love.graphics.setColor(Pal[clr])
     love.graphics.line(x1, y1, x2, y2)
