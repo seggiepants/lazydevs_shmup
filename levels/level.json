@@ -65,5 +65,77 @@
             , "sy": 0.5
             , "hp": 2
         }
+        , {
+            "time": 4.0
+            , "enemyType": "devil"
+            , "x": 28
+            , "y": -8
+            , "sx": 0.25
+            , "sy": 1
+            , "hp": 2
+        }
+        , {
+            "time": 4.5
+            , "enemyType": "devil"
+            , "x": 92
+            , "y": -8
+            , "sx": -0.25
+            , "sy": 1
+            , "hp": 2
+        }
+        , {
+            "time": 5.0
+            , "enemyType": "devil"
+            , "x": 28
+            , "y": -8
+            , "sx": 0.25
+            , "sy": 1
+            , "hp": 2
+        }
+        , {
+            "time": 5.5
+            , "enemyType": "devil"
+            , "x": 92
+            , "y": -8
+            , "sx": -0.25
+            , "sy": 1
+            , "hp": 2
+        }
+        , {
+            "time": 6.2
+            , "enemyType": "spinner"
+            , "x": 28
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 1.25
+            , "hp": 2
+        }
+        , {
+            "time": 6.2
+            , "enemyType": "spinner"
+            , "x": 60
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 1.25
+            , "hp": 2
+        }
+        , {
+            "time": 6.2
+            , "enemyType": "spinner"
+            , "x": 92
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 1.25
+            , "hp": 2
+        }
+        , {
+            "time": 8.5
+            , "enemyType": "chungus"
+            , "x": 56
+            , "y": -8
+            , "sx": 0.0
+            , "sy": 0.25
+            , "hp": 25
+        }
     ]
 }

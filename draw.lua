@@ -180,6 +180,16 @@ function DrawStart()
     Spr(106, 10, ScreenH - TileSize - 10)
     Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
+    if (T % 8 < 4) then
+        Spr(41, 48, 56) -- Red Bat
+        Spr(58, 56, 56) -- Big Guy
+    else
+        Spr(42, 48, 56) -- Red Bat
+        Spr(59, 56, 56) -- Big Guy
+    end
+    -- Spinner
+    Spr(25 + math.floor((T % 16)/4), 72, 56)
+    
     CenterPrint("My Awesome Shmup", 40, 13)
     CenterPrint("Press any key to start", 80, Blink())
 end

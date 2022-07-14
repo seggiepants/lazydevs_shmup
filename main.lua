@@ -14,8 +14,8 @@ require "update"
 -- Enemy Shots
 
 -- DoggieZone
--- 1. Create more enemies 3 more (4 total) (counting my jellyfish as one)
--- 2. Expand particle effects.
+-- 1. Create more enemies 3 more (4 total) (already know which are coming up copied the red bat, and spinner, but made a new "boss" big guy)
+-- 2. Expand particle effects. (skipped, we have too much at the moment, and I did it previously)
 
 -- _INIT() in Pico-8
 function love.load()
@@ -134,6 +134,11 @@ function love.load()
             Quads[SprExplosion + i]:setViewport(x + (w * i * 2), y, w * 2, h * 2, imgW, imgH)
         end
         ]]--
+        local sprBoss = 58
+        local x, y, w, h = Quads[sprBoss]:getViewport()
+        Quads[sprBoss]:setViewport(x, y, w * 2, h * 2, imgW, imgH)
+        Quads[sprBoss + 1]:setViewport(x + w*2, y, w * 2, h * 2, imgW, imgH)
+        
 
         Sfx = {}
         Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
@@ -248,6 +253,18 @@ function AddEnemy(prototype)
         enemy.sprite = 37
         enemy.spriteMin = 37
         enemy.spriteMax = 40
+    elseif enemy.enemyType == "devil" then
+        enemy.sprite = 41
+        enemy.spriteMin = 41
+        enemy.spriteMax = 42
+    elseif enemy.enemyType == "spinner" then
+        enemy.sprite = 25
+        enemy.spriteMin = 25
+        enemy.spriteMax = 28
+    elseif enemy.enemyType == "chungus" then
+        enemy.sprite = 58
+        enemy.spriteMin = 58
+        enemy.spriteMax = 59
     end
 
     if enemy.hp == nil then
@@ -470,19 +487,33 @@ end
 function Collide(a, b)
     local x1, y1, w1, h1 = Quads[math.floor(a.sprite)]:getViewport()
     local x2, y2, w2, h2 = Quads[math.floor(b.sprite)]:getViewport()
-    if a.y >= b.y + h2 - 1 then
+    x1 = a.x
+    x2 = b.x
+    y1 = a.y
+    y2 = b.y
+    if a.ShotType == 2 then
+        h1 = y1 + h1
+        y1 = 0
+    end
+
+    if b.ShotType == 2 then
+        h2 = y2 + h2
+        y2 = 0
+    end
+    
+    if y1 >= y2 + h2 - 1 then
         return false
      end
     
-    if a.x >= b.x + w2 - 1 then
+    if x1 >= x2 + w2 - 1 then
         return false
     end
 
-    if a.x + w1 - 1 <= b.x then
+    if x1 + w1 - 1 <= x2 then
         return false
     end
     
-    if a.y + h1 - 1 <= b.y then
+    if y1 + h1 - 1 <= y2 then
         return false
     end
 
