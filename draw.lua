@@ -2,11 +2,19 @@ function DrawGame()
     love.graphics.clear(Pal[1])
     DrawStarfield()
 
+    -- Draw Shockwaves
+    for key, shockwave in pairs(Shockwaves) do
+        love.graphics.setColor(Pal[shockwave.clr])
+        love.graphics.circle("line", shockwave.x, shockwave.y, shockwave.radius)
+    end
+
     -- Draw Particles
     for key, particle in pairs(Particles) do
         love.graphics.setColor(Pal[particle.clr])
         if particle.isBeam then
             love.graphics.line(particle.startX, particle.startY, particle.x, particle.y)
+        elseif particle.isSpark then
+            Pset(particle.x, particle.y, 8)
         else
             love.graphics.circle("fill", particle.x, particle.y, particle.radius)
         end

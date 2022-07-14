@@ -84,6 +84,16 @@ function UpdateGame(dt)
         Ship.deadTime = Ship.deadTime + 1
     end
 
+    -- Animate Shockwaves
+    for i = #Shockwaves, 1, -1 do
+        local shockwave = Shockwaves[i]
+        if shockwave.radius >= shockwave.targetRadius then
+            table.remove(Shockwaves, i)
+        else
+            shockwave.radius = shockwave.radius + shockwave.speed
+        end
+    end
+
     -- Move particles
     for i = #Particles, 1, -1 do
         local particle = Particles[i]
@@ -98,21 +108,10 @@ function UpdateGame(dt)
         if particle.isExplosion then
             particle.sx = particle.sx * 0.9
             particle.sy = particle.sy * 0.9
-            particle.clr = 8
-            if particle.age > 10 then -- 5 then
-                particle.clr = 11
-            end
-            if particle.age > 14 then --7 then
-                particle.clr = 10
-            end
-            if particle.age > 20 then --10 then
-                particle.clr = 9
-            end
-            if particle.age > 24 then --12 then
-                particle.clr = 3
-            end
-            if particle.age > 30 then --15 then
-                particle.clr = 6
+            if particle.isBlue == nil or particle.isBlue == false then
+                particle.clr = GetParticleColorRed(particle.age) 
+            else
+                particle.clr = GetParticleColorBlue(particle.age)
             end
         end
 
@@ -163,17 +162,6 @@ function UpdateGame(dt)
             enemy.flash = enemy.flash - 1
         end
     end
-
-    -- Update Explosions
-    --[[
-    for i = #Explosions, 1, -1 do
-        local explosion = Explosions[i]
-        explosion.age = explosion.age + 0.5
-        if explosion.age > #ExplosionFrames then
-            table.remove(Explosions, i)
-        end
-    end
-    ]]--
     
     -- Spawn new enemies
     PreviousTime = Time
@@ -197,19 +185,22 @@ function UpdateGame(dt)
     end
 
     -- Collision Enemies x Shots
+    local halfTile = (TileSize / 2)
     for i = #Enemies, 1, -1 do
         local enemy = Enemies[i]
         for j = #Shots, 1, -1 do
             if Collide(enemy, Shots[j]) then
                 local shot = Shots[j]
-                AddShotSpray(shot.x + (TileSize / 2), shot.y + (TileSize / 2))
+                --AddShotSpray(shot.x + halfTile, shot.y + halfTile)
                 table.remove(Shots, j)
+                AddShockwave(shot.x + halfTile, shot.y + halfTile, false)
+                AddSpark(enemy.x + halfTile, enemy.y + halfTile)
                 enemy.hp = enemy.hp - 1
                 enemy.flash = FlashTimeoutMax
                 if enemy.hp <= 0 then
                     love.audio.play(Sfx["enemyHit"])
                     local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
-                    AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2))
+                    AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
                     table.remove(Enemies, i)
                     Score = Score + 1
                 else
@@ -229,10 +220,10 @@ function UpdateGame(dt)
                 Ship.invulnerable = InvulnerableMax
                 love.audio.play(Sfx["hurt"])
                 table.remove(Enemies, i)
+                AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2), true)
                 if Lives <= 0 and Ship.dead == false then
                     Ship.dead = true
                     Ship.deadTime = 0
-                    AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2))
                 end
             end
         end

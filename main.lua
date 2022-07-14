@@ -6,15 +6,16 @@ require "draw"
 require "update"
 
 -- To Do:
--- Procedurally Generated Explosions
--- Bullet Collision FX
+-- --------------------
+-- General Game Flow
+-- Music
+-- Multiple Enemies
+-- Big Enemies (Boss)
+-- Enemy Shots
 
 -- DoggieZone
--- 1. Particles to go with the clouds in an explosion.
--- . or lines
--- . or shockwaves
--- . or sprite particle explosion (I chose lines, I know shockwaves are coming and didn't want to do more art)
--- 2. Player explode on death (no color difference but done, added a timeout so you can see it)
+-- 1. Create more enemies 3 more (4 total) (counting my jellyfish as one)
+-- 2. Expand particle effects.
 
 -- _INIT() in Pico-8
 function love.load()
@@ -146,6 +147,7 @@ function love.load()
         Stars = {}
         Enemies = {}
         Particles = {}
+        Shockwaves = {}
         ShootOK = true
         SwitchOK = true
         ShotType = 1
@@ -260,7 +262,7 @@ function AddEnemy(prototype)
     table.insert(Enemies, enemy)
 end
 
-function AddExplosion(centerX,centerY)
+function AddExplosion(centerX,centerY, isBlue)
     --[[
     local explosion = {}
     local x, y, w, h = Quads[SprExplosion]:getViewport()
@@ -274,13 +276,17 @@ function AddExplosion(centerX,centerY)
     particle.isExplosion = true
     particle.x = centerX
     particle.y = centerY
-    particle.radius = 8
+    particle.radius = 10
     particle.clr = 8
     particle.sx = 0
     particle.sy = 0
     particle.age = 0
     particle.maxAge = 10
+    particle.isBlue = isBlue
     table.insert(Particles, particle)
+
+    AddShockwave(centerX, centerY, true)
+
     -- beams
     local speed = 1.5
     local clrs = {10, 11, 8, 15}
@@ -308,11 +314,38 @@ function AddExplosion(centerX,centerY)
         particle.x = centerX
         particle.y = centerY
         particle.radius = 1 + love.math.random(4)
-        particle.clr = 8
-        particle.sx = (love.math.random() - 0.5) * 3
-        particle.sy = (love.math.random() - 0.5) * 3
         particle.age = love.math.random(2)
         particle.maxAge = 20 + love.math.random(20)
+        particle.isBlue = isBlue
+        if isBlue then
+            particle.clr = GetParticleColorBlue(particle.age)
+        else
+            particle.clr = GetParticleColorRed(particle.age)
+        end
+        particle.sx = (love.math.random() - 0.5) * 6
+        particle.sy = (love.math.random() - 0.5) * 6
+        particle.isSpark = false
+        table.insert(Particles, particle)
+    end
+
+    -- sparks
+    for i = 1, 20 do
+        local particle = {}
+        particle.isExplosion = true
+        particle.x = centerX
+        particle.y = centerY
+        particle.radius = 1 + love.math.random(4)
+        particle.age = love.math.random(2)
+        particle.maxAge = 20 + love.math.random(20)
+        particle.isBlue = isBlue
+        if isBlue then
+            particle.clr = GetParticleColorBlue(particle.age)
+        else
+            particle.clr = GetParticleColorRed(particle.age)
+        end
+        particle.sx = (love.math.random() - 0.5) * 10
+        particle.sy = (love.math.random() - 0.5) * 10
+        particle.isSpark = true
         table.insert(Particles, particle)
     end
 end
@@ -327,6 +360,39 @@ function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
     particle.maxAge = lifeTime
     particle.clr = clr
     particle.radius = radius
+    table.insert(Particles, particle)
+end
+
+function AddShockwave(x, y, isBig)
+    local shockwave = {}
+    shockwave.x = x
+    shockwave.y = y
+    shockwave.radius = 3
+    if isBig then
+        shockwave.targetRadius = 25
+        shockwave.speed = 3.5
+        shockwave.clr = 8
+    else
+        shockwave.targetRadius = 6
+        shockwave.speed = 1
+        shockwave.clr = 10
+    end
+    table.insert(Shockwaves, shockwave)
+end
+
+function AddSpark(centerX, centerY)
+    -- spark
+    local particle = {}
+    particle.isExplosion = true
+    particle.x = centerX
+    particle.y = centerY
+    particle.radius = 1 + love.math.random(4)
+    particle.age = love.math.random(2)
+    particle.maxAge = 20 + love.math.random(20)
+    particle.sx = (love.math.random() - 0.5) * 8
+    particle.sy = (love.math.random() - 1) * 3
+    particle.isSpark = true
+    particle.clr = 8
     table.insert(Particles, particle)
 end
 
@@ -421,4 +487,46 @@ function Collide(a, b)
     end
 
     return true
+end
+
+function GetParticleColorBlue(age)
+    local clr = 8
+    if age > 10 then -- 5 then
+        clr = 7
+    end
+    if age > 14 then --7 then
+        clr = 13
+    end
+    if age > 20 then --10 then
+        clr = 14
+    end
+    if age > 24 then --12 then
+        clr = 2
+    end
+    if age > 30 then --15 then
+        clr = 2
+    end
+
+    return clr
+end
+
+function GetParticleColorRed(age)
+    local clr = 8
+    if age > 10 then -- 5 then
+        clr = 11
+    end
+    if age > 14 then --7 then
+        clr = 10
+    end
+    if age > 20 then --10 then
+        clr = 9
+    end
+    if age > 24 then --12 then
+        clr = 3
+    end
+    if age > 30 then --15 then
+        clr = 6
+    end
+
+    return clr
 end
