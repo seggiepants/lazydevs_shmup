@@ -1,5 +1,22 @@
 {
     "name": "LEVEL 1"
+    , "prototypes": {
+        "eye": {
+            "frames": [21, 22, 23, 24]
+        }
+        , "jelly": {
+            "frames": [37, 38, 39, 40]
+        }
+        , "devil": {
+            "frames": [41, 42]
+        }
+        , "spinner": {
+            "frames": [25, 26, 27, 28]
+        }
+        , "chungus": {
+            "frames": [58, 59]
+        }
+    }
     ,"enemies": [
         {
             "time": 0.0

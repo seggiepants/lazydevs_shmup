@@ -151,9 +151,12 @@ function UpdateGame(dt)
         enemy.time = enemy.time + dt
         enemy.y = enemy.y + enemy.sy
         enemy.x = enemy.x + enemy.sx
-        enemy.sprite= enemy.sprite + 0.2
-        if enemy.sprite >= enemy.spriteMax + 1 then
-            enemy.sprite = enemy.spriteMin
+        enemy.spriteIndex= enemy.spriteIndex + 0.2
+        if math.floor(enemy.spriteIndex) > #enemy.frames then
+            enemy.sprite = enemy.frames[1]
+            enemy.spriteIndex = 1
+        else
+            enemy.sprite = enemy.frames[math.floor(enemy.spriteIndex)]
         end
         if enemy.y > ScreenH then
             table.remove(Enemies, i)

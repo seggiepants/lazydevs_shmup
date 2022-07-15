@@ -142,21 +142,15 @@ function DrawStarfield()
 end
 
 function DrawOver()
-    love.graphics.clear(Pal[9])
-    love.graphics.setColor(Pal[3])
-    for y=0,ScreenH,TileSize do
-        for x = 0,ScreenW,TileSize do
-            if ((x/TileSize) + (y/TileSize)) % 2 == 1 then
-                love.graphics.rectangle("fill", x, y, TileSize, TileSize)
-            end
-        end
-    end
+    DrawGame()
+    love.graphics.setColor({0.0, 0.0, 0.0, 0.5})
+    love.graphics.rectangle("fill", 0, 0, ScreenW, ScreenH)
     Spr(108, 10, 10)
     Spr(108, ScreenW - TileSize - 10, 10)
     Spr(108, 10, ScreenH - TileSize - 10)
     Spr(108, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
-    CenterPrint("GAME OVER", 40, 8)
+    CenterPrint("GAME OVER", 40, 9)
     CenterPrint("Press any key to continue", 80, Blink())
 end
 
@@ -200,22 +194,17 @@ function DrawWaveText()
 end
 
 function DrawWin()
-    love.graphics.clear(Pal[4])
-    love.graphics.setColor(Pal[12])
-    for y=0,ScreenH,TileSize do
-        for x = 0,ScreenW,TileSize do
-            if ((x/TileSize) + (y/TileSize)) % 2 == 1 then
-                love.graphics.rectangle("fill", x, y, TileSize, TileSize)
-            end
-        end
-    end
+    DrawGame()
+    love.graphics.setColor({0.0, 0.0, 0.0, 0.5})
+    love.graphics.rectangle("fill", 0, 0, ScreenW, ScreenH)
+
     Spr(106, 10, 10)
     Spr(107, ScreenW - TileSize - 10, 10)
     Spr(106, 10, ScreenH - TileSize - 10)
     Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
-    CenterPrint("CONGRATULATIONS!", 40, 8)
-    CenterPrint("YOU WIN", 56, 8)
+    CenterPrint("CONGRATULATIONS!", 40, 13)
+    CenterPrint("YOU WIN", 56, 13)
     CenterPrint("Press any key to continue", 80, Blink())
 end
 

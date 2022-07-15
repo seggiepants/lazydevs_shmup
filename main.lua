@@ -6,6 +6,8 @@ require "draw"
 require "update"
 require "enemies"
 
+-- Stopped at episode 18 - 33:03 - Bigger Sprites
+
 -- To Do:
 -- --------------------
 -- Wave Logic
@@ -242,60 +244,6 @@ function love.update(dt)
     else
         PrintScreenReleased = true
     end
-end
-
-function AddEnemy(prototype)
-    local enemy = {}
-    for key, value in pairs(prototype) do
-        enemy[key] = value
-    end
-    if enemy.x == nil then
-        enemy.x = (ScreenW - TileSize) / 2
-    end
-    if enemy.y == nil then
-        enemy.y = -1 * TileSize
-    end
-
-    if enemy.sx == nil then
-        enemy.sx = 0
-    end
-    
-    if enemy.sy == nil then
-        enemy.sy = 1
-    end
-
-    if enemy.enemyType == nil or enemy.enemyType == "eye" then
-        enemy.sprite = 21
-        enemy.spriteMin = 21
-        enemy.spriteMax = 24
-    elseif enemy.enemyType == "jelly" then
-        enemy.sprite = 37
-        enemy.spriteMin = 37
-        enemy.spriteMax = 40
-    elseif enemy.enemyType == "devil" then
-        enemy.sprite = 41
-        enemy.spriteMin = 41
-        enemy.spriteMax = 42
-    elseif enemy.enemyType == "spinner" then
-        enemy.sprite = 25
-        enemy.spriteMin = 25
-        enemy.spriteMax = 28
-    elseif enemy.enemyType == "chungus" then
-        enemy.sprite = 58
-        enemy.spriteMin = 58
-        enemy.spriteMax = 59
-    end
-
-    if enemy.hp == nil then
-        enemy.hp = 1
-    end
-
-    enemy.time = 0
-    enemy.visible = false
-    enemy.flash = 0
-    enemy.dead = false
-
-    table.insert(Enemies, enemy)
 end
 
 function AddExplosion(centerX,centerY, isBlue)
