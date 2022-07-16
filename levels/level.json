@@ -13,6 +13,9 @@
         , "spinner": {
             "frames": [25, 26, 27, 28]
         }
+        , "butterfly": {
+            "frames": [43, 44, 45, 44]
+        }
         , "chungus": {
             "frames": [58, 59]
         }
@@ -146,7 +149,34 @@
             , "hp": 2
         }
         , {
-            "time": 8.5
+            "time": 7.0
+            , "enemyType": "butterfly"
+            , "x": 28
+            , "y": -8
+            , "sx": 0.25
+            , "sy": 0.4
+            , "hp": 3
+        }
+        , {
+            "time": 7.0
+            , "enemyType": "butterfly"
+            , "x": 60
+            , "y": -16
+            , "sx": 0.0
+            , "sy": 0.4
+            , "hp": 3
+        }
+        , {
+            "time": 7.0
+            , "enemyType": "butterfly"
+            , "x": 92
+            , "y": -8
+            , "sx": -0.25
+            , "sy": 0.4
+            , "hp": 3
+        }
+        , {
+            "time": 9.0
             , "enemyType": "chungus"
             , "x": 56
             , "y": -8
