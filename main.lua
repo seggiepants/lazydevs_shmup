@@ -10,16 +10,18 @@ require "enemies"
 
 -- To Do:
 -- --------------------
--- Wave Logic
--- Better Music Integration
 -- Nicer Screens
--- Multiple Enemies
--- Big Enemies (Boss)
+-- Flexible Collision Detection
+-- Winning Music
+-- Even more Enemies
+-- Enemy Behavior
+-- Where do Enemies Spawn?
 -- Enemy Shots
 
 -- DoggieZone
--- 1. Make your own music
--- 2. Additional enemies if not done last time.
+-- 1. Make your own music - It is horrible but it is mine.
+-- 2. Additional enemies if not done last time - Added the butterfly enemy. Just JSON & graphics, woot!
+-- 3. Tweak Collision Detection for alt-size enemies - Already made it work.
 
 -- _INIT() in Pico-8
 function love.load()
