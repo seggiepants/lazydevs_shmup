@@ -14,9 +14,10 @@ Requirements:
 * [Love2D](https://love2d.org/)
 * [LunaJson](https://luarocks.org/modules/grafi/lunajson) (install via LuaRocks)
 * [Bitstream Vera Mono](https://www.1001fonts.com/bitstream-vera-sans-mono-font.html) font. (May be swapped out for another).
-* If editing in [VS Code](https://code.visualstudio.com/) will want the [Local Lua Debugger](https://marketplace.visualstudio.com/items?itemName=tomblind.local-lua-debugger-vscode) extension.
 
 Tools:
 * [GIMP](gimp.org) for sprite work
 * [Milky Tracker](https://milkytracker.org/) for (horrible) music
 * [JFXR](https://jfxr.frozenfractal.com/) for sound effects
+* [Visual Studio Code](https://code.visualstudio.com/) for editing
+* You will want the [Local Lua Debugger](https://marketplace.visualstudio.com/items?itemName=tomblind.local-lua-debugger-vscode) extension for Visual Studio Code.

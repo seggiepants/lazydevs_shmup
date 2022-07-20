@@ -6,7 +6,7 @@ require "draw"
 require "update"
 require "enemies"
 
--- Stopped at episode 18 - 33:03 - Bigger Sprites
+-- Stopped at episode 19 - 40:53 - Use MakeSprite for Shots
 
 -- To Do:
 -- --------------------
@@ -19,9 +19,7 @@ require "enemies"
 -- Enemy Shots
 
 -- DoggieZone
--- 1. Make your own music - It is horrible but it is mine.
--- 2. Additional enemies if not done last time - Added the butterfly enemy. Just JSON & graphics, woot!
--- 3. Tweak Collision Detection for alt-size enemies - Already made it work.
+-- 1. Space Invaders Wave 10x4 grid
 
 -- _INIT() in Pico-8
 function love.load()
@@ -128,7 +126,7 @@ function love.load()
             do
                 if x ~= 0 or y ~= 0 then
                     i = i + 1
-                    Quads[i] = love.graphics.newQuad(x, y, TileSize, TileSize, Img)
+                    Quads[i] = love.graphics.newQuad(x, y, TileSize, TileSize, imgW, imgH)
                 end
             end
         end
@@ -154,13 +152,18 @@ function love.load()
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
         Music["game"] = love.audio.newSource("audio/gameplay.xm", "stream")
+        Music["firstlevel"] = love.audio.newSource("audio/firstlevel.xm", "stream")
         Music["nextwave"] = love.audio.newSource("audio/nextwave.xm", "stream")
         Music["over"] = love.audio.newSource("audio/lose.xm", "stream")
         Music["win"] = love.audio.newSource("audio/win.xm", "stream")
         Ship = {}
+        ShipPrototype = {
+            frames = {1, 2, 3}
+        }
         Ship.sprite = 2
         FlameSpr = 5
         Lives = 3
+        Lockout = 0
         Stars = {}
         Enemies = {}
         Particles = {}
@@ -168,7 +171,19 @@ function love.load()
         ShootOK = true
         SwitchOK = true
         ShotType = 1
-        ShotTypes = {16, 103, 104, 105} -- Fire Ball, Laser, Spread, Wave
+        ShotTypes = {
+            {
+                frames = {16}
+            }, 
+            {
+                frames = {103}
+            }, 
+            {
+                frames = {104}
+            }, 
+            {
+                frames = {105}
+            }} -- Fire Ball, Laser, Spread, Wave
         Shots = {}
         ButtonReady = false
         BlinkT = 1
@@ -178,7 +193,7 @@ function love.load()
         FlashTimeoutMax = 2
         T = 0
         Wave = 1
-        ColorIndex = 1
+        ColorIndex = 0  
         StartTitle()
     end
 end
@@ -383,15 +398,20 @@ function AddSpark(centerX, centerY)
 end
 
 function AddShot(x, y)
-    local shot = {}
+    local shot = MakeSprite(ShotTypes[ShotType])
+    shot.ShotType = ShotType
     shot.x = x
     shot.y = y
-    shot.sprite = ShotTypes[ShotType]
-    shot.ShotType = ShotType
     shot.sx = 0
     shot.sy = -4
     shot.age = 0
     shot.maxAge = 300
+
+    if ShotType == 1 then
+        shot.colX = 2
+        shot.colWidth = 6
+        shot.sy = -4
+    end
 
     if ShotType == 2 then
         shot.maxAge = 7
@@ -454,12 +474,17 @@ function Clamp(value, minValue, maxValue)
 end
 
 function Collide(a, b)
-    local x1, y1, w1, h1 = Quads[math.floor(a.sprite)]:getViewport()
-    local x2, y2, w2, h2 = Quads[math.floor(b.sprite)]:getViewport()
-    x1 = a.x
-    x2 = b.x
-    y1 = a.y
-    y2 = b.y
+    local x1, y1, w1, h1
+    local x2, y2, w2, h2
+    x1 = a.x + a.colX - 1
+    x2 = b.x + b.colX - 1
+    y1 = a.y + a.colY - 1
+    y2 = b.y + b.colY - 1
+    w1 = a.colWidth
+    w2 = b.colWidth
+    h1 = a.colHeight
+    h2 = b.colHeight
+
     if a.ShotType == 2 then
         h1 = y1 + h1
         y1 = 0
@@ -529,4 +554,36 @@ function GetParticleColorRed(age)
     end
 
     return clr
+end
+
+function MakeSprite(prototype)
+    local sprite = {}
+
+    sprite.x = 0
+    sprite.y = 0
+    sprite.sx = 0
+    sprite.sy = 1
+    sprite.spriteIndex = 1
+    sprite.sprite = 0
+    sprite.flash = 0
+    sprite.dead = false
+
+    if prototype ~= nil then
+        for key, value in pairs(prototype) do
+            sprite[key] = value
+        end
+    end
+
+    if sprite.frames ~= nil then
+        sprite.sprite = sprite.frames[1]
+    end
+    local x, y, w, h = Quads[sprite.sprite]:getViewport()
+    sprite.width = w
+    sprite.height = h
+    sprite.colX = 1
+    sprite.colY = 1
+    sprite.colWidth = sprite.width
+    sprite.colHeight = sprite.height
+
+    return sprite
 end

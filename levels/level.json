@@ -1,188 +1,57 @@
 {
-    "name": "LEVEL 1"
-    , "prototypes": {
+    "prototypes": {
         "eye": {
-            "frames": [21, 22, 23, 24]
+            "hp": 2
+            , "frames": [21, 22, 23, 24]
         }
         , "jelly": {
-            "frames": [37, 38, 39, 40]
+            "hp": 2
+            , "frames": [37, 38, 39, 40]
         }
         , "devil": {
-            "frames": [41, 42]
+            "hp": 2
+            , "frames": [41, 42]
         }
         , "spinner": {
-            "frames": [25, 26, 27, 28]
+            "hp": 2
+            , "frames": [25, 26, 27, 28]
         }
         , "butterfly": {
-            "frames": [43, 44, 45, 44]
+            "hp": 3
+            , "frames": [43, 44, 45, 44]
         }
         , "chungus": {
-            "frames": [58, 59]
+            "hp": 25
+            , "frames": [58, 59]
         }
     }
-    ,"enemies": [
+    , "waves": [
         {
-            "time": 0.0
-            , "enemyType": "eye"
-            , "x": 60
-            , "y": -8
-            , "sx": 0
-            , "sy": 1
-            , "hp": 8
+            "name": "Wave 1"
+            , "formation": [
+                  ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+            ]
         }
         , {
-            "time": 1.0
-            , "enemyType": "eye"
-            , "x": 0
-            , "y": -8
-            , "sx": 0.25
-            , "sy": 0.5
-            , "hp": 8
-        } 
-        , {
-            "time": 2.0
-            , "enemyType": "eye"
-            , "x": 120
-            , "y": -8
-            , "sx": -0.25
-            , "sy": 0.5
-            , "hp": 2
-        }
-
-        , {
-            "time": 3.0
-            , "enemyType": "jelly"
-            , "x": 20
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 0.5
-            , "hp": 2
+            "name": "Wave 2"
+            , "formation": [
+                  ["butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly"]
+                , ["devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil"]
+                , ["jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly"]
+                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+            ]
         }
         , {
-            "time": 3.0
-            , "enemyType": "jelly"
-            , "x": 50
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 0.5
-            , "hp": 2
-        }
-        , {
-            "time": 3.0
-            , "enemyType": "jelly"
-            , "x": 80
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 0.5
-            , "hp": 2
-        }
-        , {
-            "time": 3.0
-            , "enemyType": "jelly"
-            , "x": 100
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 0.5
-            , "hp": 2
-        }
-        , {
-            "time": 4.0
-            , "enemyType": "devil"
-            , "x": 28
-            , "y": -8
-            , "sx": 0.25
-            , "sy": 1
-            , "hp": 2
-        }
-        , {
-            "time": 4.5
-            , "enemyType": "devil"
-            , "x": 92
-            , "y": -8
-            , "sx": -0.25
-            , "sy": 1
-            , "hp": 2
-        }
-        , {
-            "time": 5.0
-            , "enemyType": "devil"
-            , "x": 28
-            , "y": -8
-            , "sx": 0.25
-            , "sy": 1
-            , "hp": 2
-        }
-        , {
-            "time": 5.5
-            , "enemyType": "devil"
-            , "x": 92
-            , "y": -8
-            , "sx": -0.25
-            , "sy": 1
-            , "hp": 2
-        }
-        , {
-            "time": 6.2
-            , "enemyType": "spinner"
-            , "x": 28
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 1.25
-            , "hp": 2
-        }
-        , {
-            "time": 6.2
-            , "enemyType": "spinner"
-            , "x": 60
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 1.25
-            , "hp": 2
-        }
-        , {
-            "time": 6.2
-            , "enemyType": "spinner"
-            , "x": 92
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 1.25
-            , "hp": 2
-        }
-        , {
-            "time": 7.0
-            , "enemyType": "butterfly"
-            , "x": 28
-            , "y": -8
-            , "sx": 0.25
-            , "sy": 0.4
-            , "hp": 3
-        }
-        , {
-            "time": 7.0
-            , "enemyType": "butterfly"
-            , "x": 60
-            , "y": -16
-            , "sx": 0.0
-            , "sy": 0.4
-            , "hp": 3
-        }
-        , {
-            "time": 7.0
-            , "enemyType": "butterfly"
-            , "x": 92
-            , "y": -8
-            , "sx": -0.25
-            , "sy": 0.4
-            , "hp": 3
-        }
-        , {
-            "time": 9.0
-            , "enemyType": "chungus"
-            , "x": 56
-            , "y": -8
-            , "sx": 0.0
-            , "sy": 0.25
-            , "hp": 25
+            "name": "Wave 3"
+            , "formation": [
+                  ["", "", "", "butterfly", "chungus", "", "butterfly", "", "", ""]
+                , ["", "", "spinner", "eye", "eye", "eye", "eye", "spinner", "", ""]
+                , ["", "devil", "eye", "eye", "eye", "eye", "eye", "eye", "devil", ""]
+                , ["jelly", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "jelly"]
+            ]
         }
     ]
 }

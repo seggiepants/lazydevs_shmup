@@ -4,63 +4,53 @@ function AddEnemy(prototype)
         enemyType = "eye"
     end
     local basePrototype = LevelJson["prototypes"][enemyType]
-    local enemy = {}
-
-    if basePrototype ~= nil then
-        for key, value in pairs(basePrototype) do
-            enemy[key] = value
-        end
-    end
+    local enemy = MakeSprite(basePrototype)
 
     for key, value in pairs(prototype) do
         enemy[key] = value
     end
-    if enemy.x == nil then
-        enemy.x = (ScreenW - TileSize) / 2
-    end
-    if enemy.y == nil then
-        enemy.y = -1 * TileSize
-    end
-
-    if enemy.sx == nil then
-        enemy.sx = 0
-    end
     
-    if enemy.sy == nil then
-        enemy.sy = 1
-    end
-
-    enemy.spriteIndex = 1
-    enemy.sprite = enemy.frames[enemy.spriteIndex]
-
     if enemy.hp == nil then
         enemy.hp = 1
     end
 
     enemy.time = 0
     enemy.visible = false
-    enemy.flash = 0
-    enemy.dead = false
-
+    
     table.insert(Enemies, enemy)
 end
 
 function AddEnemyWave()
-    Time = 0
-    PreviousTime = -1.0
+    local grid = LevelJson["waves"][Wave]["formation"]
+    local y = 2.5 * TileSize
+    local xStep = 1.5 * TileSize
+    local yStep = (2 * TileSize) + 2
+    for j, row in pairs(grid) do
+        local x = (ScreenW - (#row * xStep)) / 2
+        for i, enemyType in pairs(row) do
+            if enemyType ~= nil and enemyType ~= "" then
+                AddEnemy({x=x, y=y, sx=0, sy=0,enemyType=enemyType})
+            end
+            x = x + xStep
+        end
+        y = y + yStep
+    end
 end
 
 function NextWave()
     Wave = Wave + 1
-    if Wave > 4 then
+    if Wave > #LevelJson["waves"] then
         StartWin()
     else
+        love.audio.stop()
+        local bgm
         if Wave > 1 then
-            love.audio.stop()
-            local bgm = Music["nextwave"]
-            bgm:setLooping(false)
-            bgm:play()
+            bgm = Music["nextwave"]
+        else
+            bgm = Music["firstlevel"]
         end
+        bgm:setLooping(false)
+        bgm:play()
         WaveTime = 75
         Mode = "WAVETEXT"
         PreviousTime = -1

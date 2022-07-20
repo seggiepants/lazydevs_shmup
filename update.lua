@@ -36,7 +36,7 @@ function UpdateGame(dt)
             if ShootOK then
                 AddShot(Ship.x, Ship.y - (TileSize / 2))
                 love.audio.play(Sfx["laser"])
-                Muzzle = 6
+                Muzzle = 5
                 ShootOK = false
                 Ship.shotTimeout = ShotTimeoutMax
             end
@@ -124,9 +124,15 @@ function UpdateGame(dt)
         end
     end
 
-    -- Move the bullet
+    -- Remove "dead" shots
     for i = #Shots, 1, -1  do
-        local shot = Shots[i]
+        if Shots[i].dead == true then
+            table.remove(Shots, i)
+        end
+    end
+    
+    -- Move the bullet
+    for i, shot in pairs(Shots)  do
         if shot.ShotType == 4 then -- wave
             shot.x = shot.x + (math.cos(shot.time) * shot.amplitude)
             shot.time = shot.time + .75
@@ -140,7 +146,7 @@ function UpdateGame(dt)
             shot.y > ScreenH + TileSize or
             shot.x < -1 * TileSize or
             shot.x > ScreenW + TileSize then
-            table.remove(Shots, i)
+            shot.dead = true
         end
         shot.age = shot.age + 1
     end
@@ -166,20 +172,9 @@ function UpdateGame(dt)
         end
     end
     
-    -- Spawn new enemies
+    -- Check for Next Wave
     if Mode == "GAME" then
-        PreviousTime = Time
-        Time = Time + dt
-        local maxTime = 0
-        for i, enemy in pairs(LevelJson["enemies"]) do 
-            maxTime = math.max(maxTime, enemy.time)
-            if enemy.time >= PreviousTime and enemy.time < Time then
-                AddEnemy(enemy)
-            end
-        end
-
-        -- Debug, replay the wave
-        if #Enemies == 0 and Time > maxTime then
+        if #Enemies == 0 then 
             NextWave()
         end
     end
@@ -188,23 +183,25 @@ function UpdateGame(dt)
     local halfTile = (TileSize / 2)
     for i = #Enemies, 1, -1 do
         local enemy = Enemies[i]
-        for j = #Shots, 1, -1 do
-            if Collide(enemy, Shots[j]) then
-                local shot = Shots[j]
-                --AddShotSpray(shot.x + halfTile, shot.y + halfTile)
-                table.remove(Shots, j)
-                AddShockwave(shot.x + halfTile, shot.y + halfTile, false)
-                AddSpark(enemy.x + halfTile, enemy.y + halfTile)
-                enemy.hp = enemy.hp - 1
-                enemy.flash = FlashTimeoutMax
-                if enemy.hp <= 0 then
-                    love.audio.play(Sfx["enemyHit"])
-                    local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
-                    AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
-                    table.remove(Enemies, i)
-                    Score = Score + 1
-                else
-                    love.audio.play(Sfx["enemyShieldHit"])
+        for j, shot in pairs(Shots) do
+            if shot.dead ~= true then
+                if Collide(enemy, Shots[j]) then
+                    local shot = Shots[j]
+                    --AddShotSpray(shot.x + halfTile, shot.y + halfTile)
+                    shot.dead = true
+                    AddShockwave(shot.x + halfTile, shot.y + halfTile, false)
+                    AddSpark(enemy.x + halfTile, enemy.y + halfTile)
+                    enemy.hp = enemy.hp - 1
+                    enemy.flash = FlashTimeoutMax
+                    if enemy.hp <= 0 then
+                        love.audio.play(Sfx["enemyHit"])
+                        local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
+                        AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
+                        table.remove(Enemies, i)
+                        Score = Score + 1
+                    else
+                        love.audio.play(Sfx["enemyShieldHit"])
+                    end
                 end
             end     
         end
@@ -260,6 +257,10 @@ function UpdateStarfield()
 end
 
 function UpdateOver(dt)
+    if T < Lockout then
+        return
+    end
+    
     if love.keyboard.isDown("tab") == false and 
         love.keyboard.isDown("x") == false and
         love.keyboard.isDown("space") == false and
@@ -308,6 +309,10 @@ function UpdateWaveText(dt)
 end
 
 function UpdateWin(dt)
+    if T < Lockout then
+        return
+    end
+    
     if love.keyboard.isDown("tab") == false and 
         love.keyboard.isDown("x") == false and
         love.keyboard.isDown("space") == false and
@@ -331,14 +336,15 @@ function StartGame()
     Stars = {}
     Wave = 0
     NextWave()
+    Ship = MakeSprite(ShipPrototype)
     Ship.x = (ScreenW - TileSize) / 2
     Ship.y = (ScreenH - TileSize) / 2
     Ship.sx = 0
     Ship.sy = 0
-    Ship.sprite = 2
+    Ship.spriteIndex = 2
+    Ship.sprite = Ship.frames[Ship.spriteIndex]
     Ship.invulnerable = 0
     Ship.shotTimeout = 0
-    Ship.dead = false
     Ship.deadTime = 0
     Ship.maxDeadTime = 45
     FlameSpr = 5
@@ -356,17 +362,13 @@ function StartGame()
     ShootOK = true
     SwitchOK = true
     ShotType = 1
-    ButtonReady = false
-    
-    love.audio.stop()
-    local bgm = Music["game"]
-    bgm:setLooping(true)
-    bgm:play()
+    ButtonReady = false    
 end
 
 function StartGameOver()
     ButtonReady = false
     Mode = "OVER"
+    Lockout = T + 30
     love.audio.stop()
     local bgm = Music["over"]
     bgm:setLooping(false)
@@ -390,6 +392,7 @@ end
 function StartWin()
     ButtonReady = false
     Mode = "WIN"
+    Lockout = T + 30
     love.audio.stop()
     local bgm = Music["win"]
     bgm:setLooping(false)

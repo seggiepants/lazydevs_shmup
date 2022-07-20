@@ -47,6 +47,11 @@ function DrawGame()
             end
         else
             DrawSprite(shot)
+
+            -- Uncomment for a debug collision rectangle
+            -- love.graphics.setColor(0, 1, 0, 1)
+            -- love.graphics.rectangle("line", shot.x + shot.colX - 1, shot.y + shot.colY - 1, shot.colWidth, shot.colHeight)
+    
         end
     end
 
@@ -71,6 +76,7 @@ function DrawGame()
         end
         if Muzzle > 0 then
             love.graphics.setColor(Pal[7])
+            love.graphics.circle("fill", Ship.x + 3, Ship.y - 2, Muzzle)
             love.graphics.circle("fill", Ship.x + 4, Ship.y - 2, Muzzle)
         end
     end
@@ -190,7 +196,8 @@ end
 
 function DrawWaveText()
     DrawGame()
-    CenterPrint("Wave " .. Wave, 60, Blink())
+    --CenterPrint("Wave " .. Wave, 60, Blink())
+    CenterPrint(LevelJson["waves"][Wave]["name"], 60, Blink())
 end
 
 function DrawWin()
