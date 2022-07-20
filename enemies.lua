@@ -1,3 +1,5 @@
+-- Waves and Enemies
+
 function AddEnemy(prototype)
     local enemyType = prototype.enemyType
     if enemyType == nil then
@@ -20,16 +22,23 @@ function AddEnemy(prototype)
     table.insert(Enemies, enemy)
 end
 
-function AddEnemyWave()
+function AddEnemies()
     local grid = LevelJson["waves"][Wave]["formation"]
-    local y = 2.5 * TileSize
+    local y = 2 * TileSize
     local xStep = 1.5 * TileSize
-    local yStep = (2 * TileSize) + 2
+    local yStep = 1.5 * TileSize
+    local rowCount = #grid
     for j, row in pairs(grid) do
         local x = (ScreenW - (#row * xStep)) / 2
         for i, enemyType in pairs(row) do
             if enemyType ~= nil and enemyType ~= "" then
-                AddEnemy({x=x, y=y, sx=0, sy=0,enemyType=enemyType})
+                local x1 = math.random(ScreenW)
+                local y1 = y - (yStep * rowCount) - TileSize
+                local dx = x - x1
+                local dy = y - y1
+                local sy = 2
+                local sx = 2 * (dx/dy)
+                AddEnemy({x=x1, y=y1, posX=x, posY=y, sx=sx, sy=sy,enemyType=enemyType,mission="FLYIN"})
             end
             x = x + xStep
         end
@@ -59,5 +68,5 @@ function NextWave()
         if ColorIndex > #PalGreenAlien then
             ColorIndex = 1
         end
-    end 
+    end
 end

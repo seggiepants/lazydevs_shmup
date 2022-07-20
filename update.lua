@@ -155,8 +155,13 @@ function UpdateGame(dt)
     for i = #Enemies, 1, -1 do
         local enemy = Enemies[i]
         enemy.time = enemy.time + dt
-        enemy.y = enemy.y + enemy.sy
-        enemy.x = enemy.x + enemy.sx
+
+        -- Enemy Mission
+        --enemy.y = enemy.y + enemy.sy
+        --enemy.x = enemy.x + enemy.sx
+        EnemyMission(enemy)
+        
+        -- Enemy Animation
         enemy.spriteIndex= enemy.spriteIndex + 0.2
         if math.floor(enemy.spriteIndex) > #enemy.frames then
             enemy.sprite = enemy.frames[1]
@@ -164,9 +169,12 @@ function UpdateGame(dt)
         else
             enemy.sprite = enemy.frames[math.floor(enemy.spriteIndex)]
         end
+
+        -- Clip enemy to screen
         if enemy.y > ScreenH then
             table.remove(Enemies, i)
         end
+
         if enemy.flash > 0 then
             enemy.flash = enemy.flash - 1
         end
@@ -304,7 +312,7 @@ function UpdateWaveText(dt)
         local bgm = Music["game"]
         bgm:setLooping(true)
         bgm:play()
-        AddEnemyWave()
+        AddEnemies()
     end
 end
 

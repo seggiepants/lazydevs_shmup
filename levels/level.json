@@ -29,14 +29,32 @@
         {
             "name": "Wave 1"
             , "formation": [
-                  ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
-                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
-                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
-                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+                  ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+                , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+                , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+                , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
             ]
         }
         , {
             "name": "Wave 2"
+            , "formation": [
+                  ["spinner", "jelly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "jelly", "spinner"]
+                , ["", "spinner", "jelly", "", "", "", "", "jelly", "spinner", ""]
+                , ["", "", "spinner", "jelly", "", "", "jelly", "spinner", "", ""]
+                , ["", "", "", "spinner", "jelly", "jelly", "spinner", "", "", ""]
+            ]
+        }
+        , {
+            "name": "Wave 3"
+            , "formation": [
+                  ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
+                , ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
+                , ["eye", "eye", "devil", "devil", "devil", "devil", "devil", "devil", "eye", "eye"]
+                , ["eye", "eye", "devil", "devil", "devil", "devil", "devil", "devil", "eye", "eye"]
+            ]
+        }
+        , {
+            "name": "Wave 4"
             , "formation": [
                   ["butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly"]
                 , ["devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil"]
@@ -45,10 +63,37 @@
             ]
         }
         , {
-            "name": "Wave 3"
+            "name": "Wave 5"
+            , "formation": [
+                  ["", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", ""]
+                , ["devil", "butterfly", "jelly", "", "eye", "", "eye", "jelly", "butterfly", "devil"]
+                , ["", "butterfly", "jelly", "eye", "", "eye", "", "jelly", "butterfly", ""]
+                , ["devil", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", "devil"]
+            ]
+        }
+        , {
+            "name": "Wave 6"
+            , "formation": [
+                  ["", "devil", "", "devil", "", "devil", "", "devil", "", "devil"]
+                , ["devil", "", "devil", "", "devil", "", "devil", "", "devil", ""]
+                , ["", "devil", "", "devil", "", "devil", "", "devil", "", "devil"]
+                , ["devil", "", "devil", "", "devil", "", "devil", "", "devil", ""]
+            ]
+        }
+        , {
+            "name": "Wave 7"
+            , "formation": [
+                  ["", "", "", "", "chungus", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+            ]
+        }
+        , {
+            "name": "Final Wave"
             , "formation": [
                   ["", "", "", "butterfly", "chungus", "", "butterfly", "", "", ""]
-                , ["", "", "spinner", "eye", "eye", "eye", "eye", "spinner", "", ""]
+                , ["", "", "spinner", "eye", "", "", "eye", "spinner", "", ""]
                 , ["", "devil", "eye", "eye", "eye", "eye", "eye", "eye", "devil", ""]
                 , ["jelly", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "jelly"]
             ]

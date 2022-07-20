@@ -17,7 +17,7 @@ Requirements:
 
 Tools:
 * [GIMP](gimp.org) for sprite work
-* [Milky Tracker](https://milkytracker.org/) for (horrible) music
+* [Milky Tracker](https://milkytracker.org/) for music (sorry mine is so horrible)
 * [JFXR](https://jfxr.frozenfractal.com/) for sound effects
 * [Visual Studio Code](https://code.visualstudio.com/) for editing
 * You will want the [Local Lua Debugger](https://marketplace.visualstudio.com/items?itemName=tomblind.local-lua-debugger-vscode) extension for Visual Studio Code.

@@ -5,21 +5,22 @@ Json = require "lunajson"
 require "draw"
 require "update"
 require "enemies"
-
--- Stopped at episode 19 - 40:53 - Use MakeSprite for Shots
+require "behavior"
 
 -- To Do:
 -- --------------------
 -- Nicer Screens
 -- Flexible Collision Detection
--- Winning Music
 -- Even more Enemies
 -- Enemy Behavior
 -- Where do Enemies Spawn?
 -- Enemy Shots
 
 -- DoggieZone
--- 1. Space Invaders Wave 10x4 grid
+-- 1. Design a level - get to 6-8 levels -- done
+-- 2. Make the fly-in mission less boring/robotic -- random x coordinate so they fly in from angles, sorry, lame.
+-- 3. Make an attack mission. -- done random on a regular interval (more likely less enemies remaining). Lame but effective
+-- I largely kept my json based enemy pattern code for this episode. You can add/edit the wave formations without changing the code.
 
 -- _INIT() in Pico-8
 function love.load()

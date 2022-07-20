@@ -164,15 +164,15 @@ function DrawStart()
     love.graphics.clear(Pal[2])
     local x = ScreenW / 2
     local y = ScreenH / 2
-    love.graphics.setColor(Pal[3])
+    love.graphics.setColor(Pal[1])
     MaxRadius = math.sqrt((ScreenW/2)^2 + (ScreenH/2)^2)
     for radius = 10, MaxRadius, 10 do
-        love.graphics.circle("line", x, y, radius)
+        love.graphics.circle("line", x, y, radius - (T % 10))
     end
     local radius = math.max(ScreenW / 2, ScreenH / 2)
     local offset = (love.timer.getTime() * 25) % 360
     for angle = 0, 360, 15 do
-        Line(x, y, x + (MaxRadius * math.cos(math.rad(angle + offset))), y + (MaxRadius * math.sin(math.rad(angle + offset))), 3)
+        Line(x, y, x + (MaxRadius * math.cos(math.rad(angle + offset))), y + (MaxRadius * math.sin(math.rad(angle + offset))), 1)
     end
     
     Spr(106, 10, 10)
@@ -180,6 +180,7 @@ function DrawStart()
     Spr(106, 10, ScreenH - TileSize - 10)
     Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
+    --[[
     if (T % 8 < 4) then
         Spr(41, 48, 56) -- Red Bat
         Spr(58, 56, 56) -- Big Guy
@@ -189,7 +190,8 @@ function DrawStart()
     end
     -- Spinner
     Spr(25 + math.floor((T % 16)/4), 72, 56)
-    
+    ]]--
+
     CenterPrint("My Awesome Shmup", 40, 13)
     CenterPrint("Press any key to start", 80, Blink())
 end
