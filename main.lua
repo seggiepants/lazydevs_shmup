@@ -9,18 +9,20 @@ require "behavior"
 
 -- To Do:
 -- --------------------
--- Nicer Screens
--- Flexible Collision Detection
--- Even more Enemies
 -- Enemy Behavior
--- Where do Enemies Spawn?
 -- Enemy Shots
+-- Nicer Screens
 
 -- DoggieZone
--- 1. Design a level - get to 6-8 levels -- done
--- 2. Make the fly-in mission less boring/robotic -- random x coordinate so they fly in from angles, sorry, lame.
--- 3. Make an attack mission. -- done random on a regular interval (more likely less enemies remaining). Lame but effective
--- I largely kept my json based enemy pattern code for this episode. You can add/edit the wave formations without changing the code.
+-- 1. Experiment with fly-in animation. (comes in from alternating sides per wave)
+-- 2. Pick enemies from bottom of the screen first (bottom row unless less than three available, then second to the last too)
+-- 3. Different attack motions based on enemy type (zig zag, straight down, slow, etc.)
+--    a. eye - basic straight down
+--    b. jelly - sine wave wiggle on the x - coordinate (wiggles down)
+--    c. devil - aim left or right depending on ship position
+--    d. spinner - random left right aim plus increasing descent speed
+--    e. butterfly - sine wave wiggle on the y - coordinate (creeps down)
+--    f. chungus - basic straight down but slower
 
 -- _INIT() in Pico-8
 function love.load()
@@ -150,6 +152,7 @@ function love.load()
         Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
         Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
         Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
+        Sfx["nextWave"] = love.audio.newSource("audio/spawnWave.wav", "static")
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
         Music["game"] = love.audio.newSource("audio/gameplay.xm", "stream")

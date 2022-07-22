@@ -16,6 +16,10 @@ function AddEnemy(prototype)
         enemy.hp = 1
     end
 
+    if enemy.wait == nil then
+        enemy.wait = 0
+    end
+
     enemy.time = 0
     enemy.visible = false
     
@@ -28,17 +32,27 @@ function AddEnemies()
     local xStep = 1.5 * TileSize
     local yStep = 1.5 * TileSize
     local rowCount = #grid
+    love.audio.play(Sfx["nextWave"])
     for j, row in pairs(grid) do
         local x = (ScreenW - (#row * xStep)) / 2
         for i, enemyType in pairs(row) do
             if enemyType ~= nil and enemyType ~= "" then
-                local x1 = math.random(ScreenW)
-                local y1 = y - (yStep * rowCount) - TileSize
-                local dx = x - x1
-                local dy = y - y1
-                local sy = 2
-                local sx = 2 * (dx/dy)
-                AddEnemy({x=x1, y=y1, posX=x, posY=y, sx=sx, sy=sy,enemyType=enemyType,mission="FLYIN"})
+                local startX = (1.25 * x) - ScreenW
+                local startY = y - (ScreenW / 2) - TileSize
+                if Wave % 2 == 0 then
+                    startX = (1.25 * x) + ScreenW
+                end
+                
+                AddEnemy({
+                    x=startX
+                    , y=startY
+                    , posX=x
+                    , posY=y
+                    , sx=0
+                    , sy=3
+                    , enemyType=enemyType
+                    , wait=x/2
+                    , mission="FLYIN"})
             end
             x = x + xStep
         end

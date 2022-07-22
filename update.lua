@@ -151,6 +151,8 @@ function UpdateGame(dt)
         shot.age = shot.age + 1
     end
 
+    PickEnemy()
+
     -- Move the enemies
     for i = #Enemies, 1, -1 do
         local enemy = Enemies[i]
