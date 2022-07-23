@@ -164,7 +164,7 @@ function UpdateGame(dt)
         EnemyMission(enemy)
         
         -- Enemy Animation
-        enemy.spriteIndex= enemy.spriteIndex + 0.2
+        enemy.spriteIndex= enemy.spriteIndex + enemy.animationSpeed
         if math.floor(enemy.spriteIndex) > #enemy.frames then
             enemy.sprite = enemy.frames[1]
             enemy.spriteIndex = 1
@@ -173,8 +173,13 @@ function UpdateGame(dt)
         end
 
         -- Clip enemy to screen
-        if enemy.y > ScreenH then
-            table.remove(Enemies, i)
+        if enemy.mission ~= "FLYIN" then
+            if enemy.y > ScreenH 
+                or enemy.y < -1 * TileSize 
+                or enemy.x < -1 * TileSize 
+                or enemy.x > ScreenW then
+                table.remove(Enemies, i)
+            end
         end
 
         if enemy.flash > 0 then

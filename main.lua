@@ -14,15 +14,7 @@ require "behavior"
 -- Nicer Screens
 
 -- DoggieZone
--- 1. Experiment with fly-in animation. (comes in from alternating sides per wave)
--- 2. Pick enemies from bottom of the screen first (bottom row unless less than three available, then second to the last too)
--- 3. Different attack motions based on enemy type (zig zag, straight down, slow, etc.)
---    a. eye - basic straight down
---    b. jelly - sine wave wiggle on the x - coordinate (wiggles down)
---    c. devil - aim left or right depending on ship position
---    d. spinner - random left right aim plus increasing descent speed
---    e. butterfly - sine wave wiggle on the y - coordinate (creeps down)
---    f. chungus - basic straight down but slower
+-- 1. Create own enemy with your own behavior (zig-zag?). I am counting the butterfly creep sorry.
 
 -- _INIT() in Pico-8
 function love.load()
@@ -31,6 +23,7 @@ function love.load()
     ScreenH = 128
     ScreenScale = 4
     TileSize = 8
+    FPS = 60
 
     local success = love.window.setMode(ScreenW * ScreenScale, ScreenH * ScreenScale, {resizable=false})
     if (success) then
@@ -165,6 +158,7 @@ function love.load()
             frames = {1, 2, 3}
         }
         Ship.sprite = 2
+        AttackFrequency = 60
         FlameSpr = 5
         Lives = 3
         Lockout = 0
@@ -238,6 +232,12 @@ end
 
 --- _UPDATE in PICO-8, Hard 30 FPS
 function love.update(dt)
+    -- Cap the FPS
+    local sleepTime = (1/FPS) - dt
+    if sleepTime > 0 then 
+        -- print("Sleep Time: " .. sleepTime .. " dt: " .. dt)
+        love.timer.sleep(sleepTime) 
+    end
     BlinkT = BlinkT + 1
     T = T + 1
     if Mode == "GAME" then
@@ -570,6 +570,7 @@ function MakeSprite(prototype)
     sprite.spriteIndex = 1
     sprite.sprite = 0
     sprite.flash = 0
+    sprite.shake = 0
     sprite.dead = false
 
     if prototype ~= nil then
@@ -590,4 +591,9 @@ function MakeSprite(prototype)
     sprite.colHeight = sprite.height
 
     return sprite
+end
+
+function Move(obj)
+    obj.x = obj.x + obj.sx
+    obj.y = obj.y + obj.sy
 end

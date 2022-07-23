@@ -20,6 +20,10 @@ function AddEnemy(prototype)
         enemy.wait = 0
     end
 
+    if enemy.animationSpeed == nil then
+        enemy.animationSpeed = 0.4
+    end
+
     enemy.time = 0
     enemy.visible = false
     
@@ -32,6 +36,10 @@ function AddEnemies()
     local xStep = 1.5 * TileSize
     local yStep = 1.5 * TileSize
     local rowCount = #grid
+    AttackFrequency = LevelJson["waves"][Wave]["attackFrequency"]
+    if AttackFrequency == nil then
+        AttackFrequency = 60
+    end
     love.audio.play(Sfx["nextWave"])
     for j, row in pairs(grid) do
         local x = (ScreenW - (#row * xStep)) / 2

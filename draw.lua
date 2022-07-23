@@ -123,7 +123,13 @@ function DrawGetReady()
 end
 
 function DrawSprite(sprite)
-    Spr(math.floor(sprite.sprite), sprite.x, sprite.y)
+    local x = sprite.x
+    local y = sprite.y
+    if sprite.shake  > 0 then
+        sprite.shake = sprite.shake - 1
+        x = x + math.sin(T/2)
+    end
+    Spr(math.floor(sprite.sprite), x, y)
 end
 
 function DrawStarfield()

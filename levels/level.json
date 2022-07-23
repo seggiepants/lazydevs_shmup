@@ -2,32 +2,39 @@
     "prototypes": {
         "eye": {
             "hp": 2
+            , "animationSpeed": 0.4
             , "frames": [21, 22, 23, 24]
         }
         , "jelly": {
             "hp": 2
+            , "animationSpeed": 0.2
             , "frames": [37, 38, 39, 40]
         }
         , "devil": {
-            "hp": 2
+            "hp": 1
+            , "animationSpeed": 0.3
             , "frames": [41, 42]
         }
         , "spinner": {
             "hp": 2
+            , "animationSpeed": 0.3
             , "frames": [25, 26, 27, 28]
         }
         , "butterfly": {
             "hp": 3
+            , "animationSpeed": 0.2
             , "frames": [43, 44, 45, 44]
         }
         , "chungus": {
             "hp": 25
+            , "animationSpeed": 0.4
             , "frames": [58, 59]
         }
     }
     , "waves": [
         {
             "name": "Wave 1"
+            , "attackFrequency": 60
             , "formation": [
                   ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
                 , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
@@ -37,6 +44,7 @@
         }
         , {
             "name": "Wave 2"
+            , "attackFrequency": 60
             , "formation": [
                   ["spinner", "jelly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "jelly", "spinner"]
                 , ["", "spinner", "jelly", "", "", "", "", "jelly", "spinner", ""]
@@ -46,6 +54,7 @@
         }
         , {
             "name": "Wave 3"
+            , "attackFrequency": 60
             , "formation": [
                   ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
                 , ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
@@ -55,6 +64,7 @@
         }
         , {
             "name": "Wave 4"
+            , "attackFrequency": 60
             , "formation": [
                   ["butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly"]
                 , ["devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil"]
@@ -64,6 +74,7 @@
         }
         , {
             "name": "Wave 5"
+            , "attackFrequency": 60
             , "formation": [
                   ["", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", ""]
                 , ["devil", "butterfly", "jelly", "", "eye", "", "eye", "jelly", "butterfly", "devil"]
@@ -73,6 +84,7 @@
         }
         , {
             "name": "Wave 6"
+            , "attackFrequency": 60
             , "formation": [
                   ["", "devil", "", "devil", "", "devil", "", "devil", "", "devil"]
                 , ["devil", "", "devil", "", "devil", "", "devil", "", "devil", ""]
@@ -82,6 +94,7 @@
         }
         , {
             "name": "Wave 7"
+            , "attackFrequency": 60
             , "formation": [
                   ["", "", "", "", "chungus", "", "", "", "", ""]
                 , ["", "", "", "", "", "", "", "", "", ""]
@@ -91,6 +104,7 @@
         }
         , {
             "name": "Final Wave"
+            , "attackFrequency": 10
             , "formation": [
                   ["", "", "", "butterfly", "chungus", "", "butterfly", "", "", ""]
                 , ["", "", "spinner", "eye", "", "", "eye", "spinner", "", ""]
