@@ -12,7 +12,7 @@ Lazy Devs [Youtube Playlist](https://www.youtube.com/playlist?list=PLea8cjCua_P3
 Requirements:
 * [Lua](lua.org)
 * [Love2D](https://love2d.org/)
-* [LunaJson](https://luarocks.org/modules/grafi/lunajson) (install via LuaRocks)
+* [LunaJson](https://luarocks.org/modules/grafi/lunajson) (install via LuaRocks, or just copy what is inside the src folder into the project)
 * [Bitstream Vera Mono](https://www.1001fonts.com/bitstream-vera-sans-mono-font.html) font. (May be swapped out for another).
 
 Tools:
