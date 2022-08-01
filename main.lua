@@ -16,6 +16,10 @@ require "behavior"
 -- DoggieZone
 -- 1. Create own enemy with your own behavior (zig-zag?). I am counting the butterfly creep sorry.
 
+-- Other
+-- --------------------
+-- Refactored input handling added joystick support, button b on title screen will exit game.
+
 -- _INIT() in Pico-8
 function love.load()
 
@@ -109,7 +113,7 @@ function love.load()
                 #endif
             ]]
         )
-        RecolorShader:send("Pal", unpack(Pal)) -- Pal[2], Pal[3], Pal[4], Pal[5], Pal[6], Pal[7], Pal[8], Pal[9], Pal[10], Pal[11], Pal[12], Pal[13], Pal[14], Pal[15])
+        RecolorShader:send("Pal", unpack(Pal)) 
 
         local levelTxt = love.filesystem.read("/levels/level.json")
         LevelJson = Json.decode(levelTxt)
@@ -185,13 +189,16 @@ function love.load()
         Shots = {}
         ButtonReady = false
         BlinkT = 1
-        PrintScreenReleased = false
         InvulnerableMax = 60
         ShotTimeoutMax = 4
         FlashTimeoutMax = 2
         T = 0
         Wave = 1
-        ColorIndex = 0  
+        ColorIndex = 0          
+        Keys = {}
+        KeysPrev = {}
+        CurrentJoystick = 0
+        Joysticks = {}
         StartTitle()
     end
 end
@@ -220,6 +227,21 @@ function love.draw()
     love.graphics.pop()
 end
 
+function love.joystickadded(joystick)
+    id = joystick:getID()
+    Joysticks[id] = joystick
+    if CurrentJoystick == 0 then CurrentJoystick = id end
+end
+
+function love.joystickremoved(joystick)
+    id = joystick:getID()    
+    table.remove(Joysticks, id)
+    if CurrentJoystick == id then CurrentJoystick = 0 end
+    if #Joysticks > 0 then 
+        CurrentJoystick, _ = next(Joysticks)
+    end
+end
+
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
@@ -240,6 +262,7 @@ function love.update(dt)
     end
     BlinkT = BlinkT + 1
     T = T + 1
+    ReadInput()
     if Mode == "GAME" then
         UpdateGame(dt)
     elseif Mode == "GET_READY" then
@@ -257,13 +280,8 @@ function love.update(dt)
         -- You won the game
         UpdateWin(dt)
     end
-    if love.keyboard.isDown("p") then
-        if PrintScreenReleased then
-            PrintScreenReleased = false
-            love.graphics.captureScreenshot("screenshot" .. os.time() .. ".png")
-        end
-    else
-        PrintScreenReleased = true
+    if Btnp("printScr") then
+        love.graphics.captureScreenshot("screenshot" .. os.time() .. ".png")        
     end
 end
 
@@ -459,6 +477,14 @@ function Blink()
     return blinkAni[BlinkT]
 end
 
+function Btn(key)
+    return Keys[key]
+end
+
+function Btnp(key)
+    return Keys[key] and not KeysPrev[key]
+end
+
 function Bounce(x, dx, maxX)
     x = x + dx
     if x < 0 then
@@ -596,4 +622,108 @@ end
 function Move(obj)
     obj.x = obj.x + obj.sx
     obj.y = obj.y + obj.sy
+end
+
+function ReadInput()
+    -- Save previous state to KeysPrev
+    for key, value in pairs(Keys) do
+        KeysPrev[key] = value
+    end
+
+    -- Initialize all to false
+    Keys.a = false
+    Keys.b = false
+    Keys.up = false
+    Keys.down = false
+    Keys.left = false
+    Keys.right = false
+    Keys.escape = false
+    Keys.printScr = false
+
+    -- Read the keyboard
+    if love.keyboard.isDown("z") then Keys.a = true end
+    if love.keyboard.isDown("x") then Keys.b = true end
+    if love.keyboard.isDown("space") then Keys.a = true end
+    if love.keyboard.isDown("tab") then Keys.b = true end
+    if love.keyboard.isDown("w") then Keys.up = true end
+    if love.keyboard.isDown("s") then Keys.down = true end
+    if love.keyboard.isDown("a") then Keys.left = true end
+    if love.keyboard.isDown("d") then Keys.right = true end
+    if love.keyboard.isDown("up") then Keys.up = true end
+    if love.keyboard.isDown("down") then Keys.down = true end
+    if love.keyboard.isDown("left") then Keys.left = true end
+    if love.keyboard.isDown("right") then Keys.right = true end
+    if love.keyboard.isDown("q") then Keys.escape = true end
+    if love.keyboard.isDown("escape") then Keys.escape = true end
+    if love.keyboard.isDown("p") then Keys.printScr = true end
+
+    -- Override if joystick set
+    if love.joystick.getJoystickCount() > 0 and CurrentJoystick > 0 then
+        joystick = Joysticks[CurrentJoystick]
+        local buttonCount = joystick:getButtonCount();
+        if buttonCount >= 1 then Keys.a = joystick:isDown(1) or Keys.a end
+        if buttonCount >= 2 then Keys.b = joystick:isDown(2) or Keys.b end
+
+        local threshold = 0.25
+        local direction
+        -- First two axis are x, and y
+        if joystick:getAxisCount() >= 2 then
+            direction = joystick:getAxis(1)
+            if math.abs(direction) > threshold then
+                if direction < 0 then Keys.left = true else Keys.right = true end
+            end
+            direction = joystick:getAxis(2)
+            if math.abs(direction) > threshold then
+                if direction < 0 then Keys.up = true else Keys.down = true end
+            end
+        end
+        
+        -- Joypad will override joystick
+        if joystick:getHatCount() > 0 then
+            direction = joystick:getHat(1)
+            if direction == "d" then
+                Keys.left = false
+                Keys.right = false
+                Keys.up = false
+                Keys.down = true
+            elseif direction == "l" then
+                Keys.left = true
+                Keys.right = false
+                Keys.up = false
+                Keys.down = false
+            elseif direction == "ld" then
+                Keys.left = true
+                Keys.right = false
+                Keys.up = false
+                Keys.down = true
+            elseif direction == "lu" then
+                Keys.left = true
+                Keys.right = false
+                Keys.up = true
+                Keys.down = false
+            elseif direction == "r" then
+                Keys.left = false
+                Keys.right = true
+                Keys.up = false
+                Keys.down = false
+            elseif direction == "rd" then
+                Keys.left = false
+                Keys.right = true
+                Keys.up = false
+                Keys.down = true
+            elseif direction == "ru" then
+                Keys.left = false
+                Keys.right = true
+                Keys.up = true
+                Keys.down = false
+            elseif direction == "u" then
+                Keys.left = false
+                Keys.right = false
+                Keys.up = true
+                Keys.down = false
+                -- else if direction == "c" then
+                --  Centered, let the 1st axis fall through
+            end
+        end
+    end
 end

@@ -7,20 +7,20 @@ function UpdateGame(dt)
         FlameSpr = 5
     end
 
-    if love.keyboard.isDown("up") then
+    if Btn("up") then
         Ship.sy = -2
     end
 
-    if love.keyboard.isDown("down") then
+    if Btn("down") then
         Ship.sy = 2
     end
 
-    if love.keyboard.isDown("left") then
+    if Btn("left") then
         Ship.sx = -2
         Ship.sprite = 1
     end
 
-    if love.keyboard.isDown("right") then
+    if Btn("right") then
         Ship.sx = 2
         Ship.sprite = 3
     end
@@ -32,7 +32,7 @@ function UpdateGame(dt)
     end
     
     if Ship.dead == false then
-        if love.keyboard.isDown("space") or love.keyboard.isDown("z") then
+        if Btn("a") then
             if ShootOK then
                 AddShot(Ship.x, Ship.y - (TileSize / 2))
                 love.audio.play(Sfx["laser"])
@@ -45,14 +45,11 @@ function UpdateGame(dt)
         end
     end
 
-    if love.keyboard.isDown("tab") == false and 
-        love.keyboard.isDown("x") == false and
-        love.keyboard.isDown("space") == false and
-        love.keyboard.isDown("z") == false then
+    if Btn("a") == false and Btn("b") == false then
         ButtonReady = true
     end
 
-    if love.keyboard.isDown("tab") or love.keyboard.isDown("x") then
+    if Btn("b") then
         if SwitchOK then
             ShotType = ShotType + 1
             if ShotType > 4 then
@@ -276,39 +273,26 @@ function UpdateOver(dt)
         return
     end
     
-    if love.keyboard.isDown("tab") == false and 
-        love.keyboard.isDown("x") == false and
-        love.keyboard.isDown("space") == false and
-        love.keyboard.isDown("z") == false then
+    if Btn("a") == false and Btn("b") == false then 
         ButtonReady = true
     end
-    if ButtonReady then
-        if love.keyboard.isDown("tab") or 
-            love.keyboard.isDown("x") or
-            love.keyboard.isDown("space") or 
-            love.keyboard.isDown("z") then
-            ButtonReady = false
-            StartTitle()
-        end 
-    end
+    if ButtonReady and (Btn("a") or Btn("b")) then
+        ButtonReady = false
+        StartTitle()
+    end 
 end
 
 function UpdateStart(dt)
-    if love.keyboard.isDown("tab") == false and 
-        love.keyboard.isDown("x") == false and
-        love.keyboard.isDown("space") == false and
-        love.keyboard.isDown("z") == false then
+    if Btn("a") == false and Btn("b") == false then
         ButtonReady = true
     end
 
-    if ButtonReady then
-        if love.keyboard.isDown("tab") or 
-            love.keyboard.isDown("x") or
-            love.keyboard.isDown("space") or 
-            love.keyboard.isDown("z") then
-            StartGame() -- was get ready
-        end 
-    end
+    if ButtonReady and Btn("a") then
+        ButtonReady = false
+        StartGame() -- was get ready
+    elseif ButtonReady and Btn("b") then
+        love.event.quit()
+    end 
 end
 
 function UpdateWaveText(dt)
@@ -328,19 +312,12 @@ function UpdateWin(dt)
         return
     end
     
-    if love.keyboard.isDown("tab") == false and 
-        love.keyboard.isDown("x") == false and
-        love.keyboard.isDown("space") == false and
-        love.keyboard.isDown("z") == false then
+    if Btn("a") == false and Btn("b") == false then
         ButtonReady = true
     end
-    if ButtonReady then
-        if love.keyboard.isDown("tab") or 
-            love.keyboard.isDown("x") or
-            love.keyboard.isDown("space") or 
-            love.keyboard.isDown("z") then
-            StartTitle()
-        end 
+    if ButtonReady and (Btn("a") or Btn("b")) then
+        ButtonReady = false
+        StartTitle()
     end
 end
 
@@ -391,6 +368,7 @@ function StartGameOver()
 end
 
 function StartGetReady()
+    ButtonReady = false
     GetReadyTime = 0
     Mode = "GET_READY"
 end
