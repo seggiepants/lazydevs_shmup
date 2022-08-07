@@ -86,9 +86,7 @@ function NextWave()
         Mode = "WAVETEXT"
         PreviousTime = -1
         Time = 0
-        ColorIndex = ColorIndex + 1
-        if ColorIndex > #PalGreenAlien then
-            ColorIndex = 1
-        end
+        EnemyShots = {} -- clear out old enemy fire
+        Shots = {} -- clear out player enemy fire
     end
 end

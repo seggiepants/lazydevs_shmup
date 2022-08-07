@@ -70,6 +70,7 @@ function EnemyMission(enemy)
             if enemy.y > ScreenH - (TileSize * 6) then
                 enemy.sy = 1
             end
+            if T % 32 == 3 then SpreadShot(enemy, 6) end
         else
             enemy.sx = 0
             enemy.sy = 1
@@ -89,25 +90,57 @@ function EnemyMission(enemy)
     end
 end
 
-function PickEnemy()
+function Move(obj)
+    obj.x = obj.x + obj.sx
+    obj.y = obj.y + obj.sy
+end
+
+function PickAttacker()
+    local idx = #Enemies - math.random(math.min(10, #Enemies)) + 1
+    --print("Enemies: " .. #Enemies .. " chose: " .. idx)
+    if idx > 0 and idx <= #Enemies then
+        local enemy = Enemies[idx]
+        if enemy == nil then return end
+        if enemy.mission ~= "PROTEC" then
+            return
+        end
+        
+        enemy.sx = 0
+        enemy.sy = 0
+        enemy.animationSpeed =  enemy.animationSpeed * 3
+        enemy.mission = "ATTAC"
+        enemy.wait = 60
+        enemy.shake = enemy.wait
+        Fire(enemy)
+    end
+end
+
+function PickFire()
+    local idx = #Enemies - math.random(math.min(10, #Enemies)) + 1
+    --print("Enemies: " .. #Enemies .. " chose: " .. idx)
+    if idx > 0 and idx <= #Enemies then
+        local enemy = Enemies[idx]
+        if enemy == nil then return end
+        if enemy.mission ~= "PROTEC" then
+            return
+        end
+        Fire(enemy)
+    end
+end
+
+function PickTimer()
     if Mode ~= "GAME" or #Enemies == 0 then
         return
     end
+
     if T % AttackFrequency == 0 then
-        local idx = #Enemies - math.random(math.min(10, #Enemies)) + 1
-        --print("Enemies: " .. #Enemies .. " chose: " .. idx)
-        if idx > 0 and idx <= #Enemies then
-            local enemy = Enemies[idx]
-            if enemy.mission ~= "PROTEC" then
-                return
-            end
-            enemy.sx = 0
-            enemy.sy = 0
-            enemy.animationSpeed =  enemy.animationSpeed * 3
-            enemy.mission = "ATTAC"
-            enemy.wait = 60
-            enemy.shake = enemy.wait
-        end
+        PickAttacker()
     end
+
+    if T > NextFire then
+        PickFire()
+        NextFire = T + 20 + math.random(20)
+    end
+
     --return enemy
 end

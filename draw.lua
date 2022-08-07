@@ -26,16 +26,12 @@ function DrawGame()
         if enemy.flash > 0 then
             RecolorShader:send("Target", unpack(PalWhite)) 
             love.graphics.setShader(RecolorShader)
-        elseif enemy.enemyType == "eye" then
-            RecolorShader:send("Target", unpack(PalGreenAlien[ColorIndex])) 
-            love.graphics.setShader(RecolorShader)
         end
         DrawSprite(enemy)
-        if enemy.flash > 0 or enemy.enemyType == "eye" then
+        if enemy.flash > 0 then
             love.graphics.setShader()
         end
     end        
-    
 
     -- Draw Bullets
     for key, shot in ipairs(Shots) do
@@ -47,11 +43,9 @@ function DrawGame()
             end
         else
             DrawSprite(shot)
-
             -- Uncomment for a debug collision rectangle
             -- love.graphics.setColor(0, 1, 0, 1)
-            -- love.graphics.rectangle("line", shot.x + shot.colX - 1, shot.y + shot.colY - 1, shot.colWidth, shot.colHeight)
-    
+            -- love.graphics.rectangle("line", shot.x + shot.colX - 1, shot.y + shot.colY - 1, shot.colWidth, shot.colHeight)    
         end
     end
 
@@ -80,14 +74,23 @@ function DrawGame()
             love.graphics.circle("fill", Ship.x + 4, Ship.y - 2, Muzzle)
         end
     end
+
+    -- Draw Enemy Bullets
+    for key, shot in ipairs(EnemyShots) do
+        DrawSprite(shot)
+        -- debug -- love.graphics.setColor(0, 1, 0)
+        -- debug -- love.graphics.rectangle("line", shot.x + shot.colX - 1, shot.y + shot.colY - 1, shot.colWidth, shot.colHeight)
+        -- debug -- love.graphics.setColor(1, 1, 1)
+    end
+    
     love.graphics.setColor(Pal[12])
     love.graphics.print("Score: " .. Score, 40, 1)
     -- Lives
     for i=1,4 do
         if Lives >= i then
-            Spr(13, i * 9 - 8, 1)
+            Spr(9, i * 9 - 8, 1)
         else
-            Spr(14, i * 9 - 8, 1)
+            Spr(10, i * 9 - 8, 1)
         end
     end
 end
@@ -127,7 +130,9 @@ function DrawSprite(sprite)
     local y = sprite.y
     if sprite.shake  > 0 then
         sprite.shake = sprite.shake - 1
-        x = x + math.sin(T/2)
+        if T % 4 < 2 then
+            x = x + 1
+        end
     end
     Spr(math.floor(sprite.sprite), x, y)
 end
@@ -157,10 +162,10 @@ function DrawOver()
     DrawGame()
     love.graphics.setColor({0.0, 0.0, 0.0, 0.5})
     love.graphics.rectangle("fill", 0, 0, ScreenW, ScreenH)
-    Spr(108, 10, 10)
-    Spr(108, ScreenW - TileSize - 10, 10)
-    Spr(108, 10, ScreenH - TileSize - 10)
-    Spr(108, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
+    Spr(58, 10, 10)
+    Spr(58, ScreenW - TileSize - 10, 10)
+    Spr(58, 10, ScreenH - TileSize - 10)
+    Spr(58, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
     CenterPrint("GAME OVER", 40, 9)
     CenterPrint("Press any key to continue", 80, Blink())
@@ -181,18 +186,18 @@ function DrawStart()
         Line(x, y, x + (MaxRadius * math.cos(math.rad(angle + offset))), y + (MaxRadius * math.sin(math.rad(angle + offset))), 1)
     end
     
-    Spr(106, 10, 10)
-    Spr(107, ScreenW - TileSize - 10, 10)
-    Spr(106, 10, ScreenH - TileSize - 10)
-    Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
+    Spr(56, 10, 10)
+    Spr(57, ScreenW - TileSize - 10, 10)
+    Spr(56, 10, ScreenH - TileSize - 10)
+    Spr(57, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
     --[[
     if (T % 8 < 4) then
-        Spr(41, 48, 56) -- Red Bat
-        Spr(58, 56, 56) -- Big Guy
+        Spr(30, 48, 56) -- Red Bat
+        Spr(40, 56, 56) -- Big Guy
     else
-        Spr(42, 48, 56) -- Red Bat
-        Spr(59, 56, 56) -- Big Guy
+        Spr(31, 48, 56) -- Red Bat
+        Spr(41, 56, 56) -- Big Guy
     end
     -- Spinner
     Spr(25 + math.floor((T % 16)/4), 72, 56)
@@ -213,10 +218,10 @@ function DrawWin()
     love.graphics.setColor({0.0, 0.0, 0.0, 0.5})
     love.graphics.rectangle("fill", 0, 0, ScreenW, ScreenH)
 
-    Spr(106, 10, 10)
-    Spr(107, ScreenW - TileSize - 10, 10)
-    Spr(106, 10, ScreenH - TileSize - 10)
-    Spr(107, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
+    Spr(56, 10, 10)
+    Spr(57, ScreenW - TileSize - 10, 10)
+    Spr(56, 10, ScreenH - TileSize - 10)
+    Spr(57, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
     CenterPrint("CONGRATULATIONS!", 40, 13)
     CenterPrint("YOU WIN", 56, 13)

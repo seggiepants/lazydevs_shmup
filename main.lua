@@ -6,19 +6,29 @@ require "draw"
 require "update"
 require "enemies"
 require "behavior"
+require "bullets"
 
 -- To Do:
 -- --------------------
 -- Enemy Behavior
 -- Enemy Shots
+-- Pickups
+-- Bombs?
+-- Boss
 -- Nicer Screens
 
 -- DoggieZone
--- 1. Create own enemy with your own behavior (zig-zag?). I am counting the butterfly creep sorry.
+-- 1. More bullet designs (one per enemy now)
+-- 2. Integrate shooting into an attack pattern (chungus fires spread while decending)
+-- 3. Have an enemy aim a shot at you (red devil aims at you)
+-- 4. Spread shots (chungus fires spread while decending - plain shot in PROTEC mode)
 
 -- Other
 -- --------------------
 -- Refactored input handling added joystick support, button b on title screen will exit game.
+-- Reworked image tile loading, now pulls tile definitions from a json file for seamless tile size differences.
+-- Added some images I will need in a couple of future episodes (boss, powerups)
+-- Took out green eye alien color cycling, it was out of place.
 
 -- _INIT() in Pico-8
 function love.load()
@@ -64,28 +74,6 @@ function love.load()
                     Pal[8], Pal[8], Pal[8], Pal[8],
                 }
         
-        -- Normal (green), Red, Blue
-        PalGreenAlien = {
-            {
-                Pal[1], Pal[2], Pal[3], Pal[4],
-                Pal[5], Pal[6], Pal[7], Pal[8],
-                Pal[9], Pal[10], Pal[11], Pal[12],
-                Pal[13], Pal[14], Pal[15], Pal[16]
-            }, 
-            {
-                Pal[1], Pal[2], Pal[3], Pal[3],
-                Pal[5], Pal[6], Pal[7], Pal[8],
-                Pal[9], Pal[10], Pal[11], Pal[9],
-                Pal[13], Pal[14], Pal[15], Pal[16]
-            },
-            {
-                Pal[1], Pal[2], Pal[3], Pal[2],
-                Pal[5], Pal[6], Pal[7], Pal[8],
-                Pal[9], Pal[10], Pal[11], Pal[13],
-                Pal[13], Pal[14], Pal[15], Pal[16]
-            },
-        }
-
         -- Shader stolen from the love2d.org forums by s-ol
         RecolorShader = love.graphics.newShader(
             [[
@@ -118,36 +106,18 @@ function love.load()
         local levelTxt = love.filesystem.read("/levels/level.json")
         LevelJson = Json.decode(levelTxt)
         Quads = {}
+        local quadsTxt = love.filesystem.read("/img/graphics.json")
+        local quadsJson = Json.decode(quadsTxt)
         local imgW, imgH = Img:getDimensions()
-        local i = 0
-        for y = 0, imgH - 1, TileSize
-        do
-            for x = 0, imgW - 1, TileSize
-            do
-                if x ~= 0 or y ~= 0 then
-                    i = i + 1
-                    Quads[i] = love.graphics.newQuad(x, y, TileSize, TileSize, imgW, imgH)
-                end
-            end
+        for i, quad in pairs(quadsJson["quads"]) do
+            Quads[i] = love.graphics.newQuad(quad.x, quad.y, quad.w, quad.h, imgW, imgH)
         end
-        --[[
-            -- Update big sprite quads.
-        SprExplosion = 48
-        local x, y, w, h = Quads[SprExplosion]:getViewport()
-        for i = 0, 4 do
-            Quads[SprExplosion + i]:setViewport(x + (w * i * 2), y, w * 2, h * 2, imgW, imgH)
-        end
-        ]]--
-        local sprBoss = 58
-        local x, y, w, h = Quads[sprBoss]:getViewport()
-        Quads[sprBoss]:setViewport(x, y, w * 2, h * 2, imgW, imgH)
-        Quads[sprBoss + 1]:setViewport(x + w*2, y, w * 2, h * 2, imgW, imgH)
-        
 
         Sfx = {}
         Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
         Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
         Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
+        Sfx["enemyShot"] = love.audio.newSource("audio/enemyShot.wav", "static")
         Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
         Sfx["nextWave"] = love.audio.newSource("audio/spawnWave.wav", "static")
         Music = {}
@@ -163,7 +133,8 @@ function love.load()
         }
         Ship.sprite = 2
         AttackFrequency = 60
-        FlameSpr = 5
+        NextFire = 0
+        FlameSpr = 4
         Lives = 3
         Lockout = 0
         Stars = {}
@@ -175,18 +146,19 @@ function love.load()
         ShotType = 1
         ShotTypes = {
             {
-                frames = {16}
+                frames = {11}
             }, 
             {
-                frames = {103}
+                frames = {53}
             }, 
             {
-                frames = {104}
+                frames = {54}
             }, 
             {
-                frames = {105}
+                frames = {55}
             }} -- Fire Ball, Laser, Spread, Wave
         Shots = {}
+        EnemyShots = {}
         ButtonReady = false
         BlinkT = 1
         InvulnerableMax = 60
@@ -194,7 +166,6 @@ function love.load()
         FlashTimeoutMax = 2
         T = 0
         Wave = 1
-        ColorIndex = 0          
         Keys = {}
         KeysPrev = {}
         CurrentJoystick = 0
@@ -228,13 +199,13 @@ function love.draw()
 end
 
 function love.joystickadded(joystick)
-    id = joystick:getID()
+    local id = joystick:getID()
     Joysticks[id] = joystick
     if CurrentJoystick == 0 then CurrentJoystick = id end
 end
 
 function love.joystickremoved(joystick)
-    id = joystick:getID()    
+    local id = joystick:getID()    
     table.remove(Joysticks, id)
     if CurrentJoystick == id then CurrentJoystick = 0 end
     if #Joysticks > 0 then 
@@ -469,6 +440,16 @@ function AddShotSpray(centerX,centerY)
     end
 end
 
+function Animate(obj)
+    obj.spriteIndex= obj.spriteIndex + obj.animationSpeed
+    if math.floor(obj.spriteIndex) > #obj.frames then
+        obj.sprite = obj.frames[1]
+        obj.spriteIndex = 1
+    else
+        obj.sprite = obj.frames[math.floor(obj.spriteIndex)]
+    end
+end
+
 function Blink()
     local blinkAni = {6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 8, 8, 7, 7, 6, 6}
     if BlinkT > #blinkAni then
@@ -611,17 +592,12 @@ function MakeSprite(prototype)
     local x, y, w, h = Quads[sprite.sprite]:getViewport()
     sprite.width = w
     sprite.height = h
-    sprite.colX = 1
-    sprite.colY = 1
-    sprite.colWidth = sprite.width
-    sprite.colHeight = sprite.height
+    if sprite.colX == nil then sprite.colX = 1 end
+    if sprite.colY == nil then sprite.colY = 1 end
+    if sprite.colWidth == nil then sprite.colWidth = sprite.width end
+    if sprite.colHeight == nil then sprite.colHeight = sprite.height end
 
     return sprite
-end
-
-function Move(obj)
-    obj.x = obj.x + obj.sx
-    obj.y = obj.y + obj.sy
 end
 
 function ReadInput()
@@ -659,7 +635,7 @@ function ReadInput()
 
     -- Override if joystick set
     if love.joystick.getJoystickCount() > 0 and CurrentJoystick > 0 then
-        joystick = Joysticks[CurrentJoystick]
+        local joystick = Joysticks[CurrentJoystick]
         local buttonCount = joystick:getButtonCount();
         if buttonCount >= 1 then Keys.a = joystick:isDown(1) or Keys.a end
         if buttonCount >= 2 then Keys.b = joystick:isDown(2) or Keys.b end

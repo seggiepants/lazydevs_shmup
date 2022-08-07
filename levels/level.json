@@ -3,32 +3,32 @@
         "eye": {
             "hp": 2
             , "animationSpeed": 0.4
-            , "frames": [21, 22, 23, 24]
+            , "frames": [13, 14, 15, 16]
         }
         , "jelly": {
             "hp": 2
             , "animationSpeed": 0.2
-            , "frames": [37, 38, 39, 40]
+            , "frames": [26, 27, 28, 29]
         }
         , "devil": {
             "hp": 1
             , "animationSpeed": 0.3
-            , "frames": [41, 42]
+            , "frames": [30, 31]
         }
         , "spinner": {
             "hp": 2
             , "animationSpeed": 0.3
-            , "frames": [25, 26, 27, 28]
+            , "frames": [17, 18, 19, 20]
         }
         , "butterfly": {
             "hp": 3
             , "animationSpeed": 0.2
-            , "frames": [43, 44, 45, 44]
+            , "frames": [32, 33, 34, 33]
         }
         , "chungus": {
             "hp": 25
             , "animationSpeed": 0.4
-            , "frames": [58, 59]
+            , "frames": [40, 41]
         }
     }
     , "waves": [

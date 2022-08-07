@@ -3,8 +3,8 @@ function UpdateGame(dt)
     Ship.sy = 0
     Ship.sprite = 2
     FlameSpr = FlameSpr + 1
-    if FlameSpr > 9 then
-        FlameSpr = 5
+    if FlameSpr > 8 then
+        FlameSpr = 4
     end
 
     if Btn("up") then
@@ -127,17 +127,22 @@ function UpdateGame(dt)
             table.remove(Shots, i)
         end
     end
-    
+
+    -- Remove "dead" enemy shots
+    for i = #EnemyShots, 1, -1  do
+        if EnemyShots[i].dead == true then
+            table.remove(EnemyShots, i)
+        end
+    end
+
     -- Move the bullet
     for i, shot in pairs(Shots)  do
         if shot.ShotType == 4 then -- wave
-            shot.x = shot.x + (math.cos(shot.time) * shot.amplitude)
+            shot.sx = (math.cos(shot.time) * shot.amplitude)
             shot.time = shot.time + .75
             shot.amplitude = shot.amplitude + .75
-        else
-            shot.x = shot.x + shot.sx
         end
-        shot.y = shot.y + shot.sy
+        Move(shot)
         if shot.age >= shot.maxAge or 
             shot.y < -1 * TileSize or
             shot.y > ScreenH + TileSize or
@@ -148,7 +153,19 @@ function UpdateGame(dt)
         shot.age = shot.age + 1
     end
 
-    PickEnemy()
+    -- Move enemy bullets
+    for i, shot in pairs(EnemyShots)  do
+        Animate(shot)
+        Move(shot)
+        if shot.y < -1 * TileSize or
+           shot.y > ScreenH + TileSize or
+           shot.x < -1 * TileSize or
+           shot.x > ScreenW + TileSize then
+            shot.dead = true
+        end
+    end
+
+    PickTimer()
 
     -- Move the enemies
     for i = #Enemies, 1, -1 do
@@ -161,13 +178,7 @@ function UpdateGame(dt)
         EnemyMission(enemy)
         
         -- Enemy Animation
-        enemy.spriteIndex= enemy.spriteIndex + enemy.animationSpeed
-        if math.floor(enemy.spriteIndex) > #enemy.frames then
-            enemy.sprite = enemy.frames[1]
-            enemy.spriteIndex = 1
-        else
-            enemy.sprite = enemy.frames[math.floor(enemy.spriteIndex)]
-        end
+        Animate(enemy)
 
         -- Clip enemy to screen
         if enemy.mission ~= "FLYIN" then
@@ -206,11 +217,7 @@ function UpdateGame(dt)
                     enemy.hp = enemy.hp - 1
                     enemy.flash = FlashTimeoutMax
                     if enemy.hp <= 0 then
-                        love.audio.play(Sfx["enemyHit"])
-                        local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
-                        AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
-                        table.remove(Enemies, i)
-                        Score = Score + 1
+                        KillEnemy(i)
                     else
                         love.audio.play(Sfx["enemyShieldHit"])
                     end
@@ -229,6 +236,23 @@ function UpdateGame(dt)
                 Ship.invulnerable = InvulnerableMax
                 love.audio.play(Sfx["hurt"])
                 table.remove(Enemies, i)
+                AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2), true)
+                if Lives <= 0 and Ship.dead == false then
+                    Ship.dead = true
+                    Ship.deadTime = 0
+                end
+            end
+        end
+    end
+
+    -- Collision Ship x Enemy Bullets
+    if Ship.invulnerable <= 0 then
+        for i = #EnemyShots, 1, -1 do
+            if Collide(Ship, EnemyShots[i]) then
+                Lives = Lives - 1
+                Ship.invulnerable = InvulnerableMax
+                love.audio.play(Sfx["hurt"])
+                table.remove(EnemyShots, i)
                 AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2), true)
                 if Lives <= 0 and Ship.dead == false then
                     Ship.dead = true
@@ -321,6 +345,20 @@ function UpdateWin(dt)
     end
 end
 
+function KillEnemy(i)
+    local enemy = Enemies[i]
+    if enemy == nil then return end
+    love.audio.play(Sfx["enemyHit"])
+    local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
+    AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
+    Score = Score + 1
+
+    if enemy.mission == "ATTAC" and math.random() < 0.5 then
+        PickAttacker()
+    end
+    table.remove(Enemies, i)
+end
+
 function StartGame()
     T = 0
     Enemies = {}
@@ -339,10 +377,10 @@ function StartGame()
     Ship.shotTimeout = 0
     Ship.deadTime = 0
     Ship.maxDeadTime = 45
-    FlameSpr = 5
+    FlameSpr = 4
     Muzzle = 0
     Score = 0
-    Lives = 3
+    Lives = 4
     local starClr = {6, 7, 8, 16}
     for i=1,100 do
         local star = {} 
