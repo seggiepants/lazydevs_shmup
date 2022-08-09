@@ -13,8 +13,8 @@ function EnemyMission(enemy)
         enemy.x = enemy.x + (enemy.posX - enemy.x) / 7
         enemy.y = enemy.y + (enemy.posY - enemy.y) / 7
         if math.abs(enemy.y - enemy.posY) < 0.7 then
-            enemy.y = math.floor(enemy.posY)
-            enemy.x = math.floor(enemy.posX)
+            enemy.y = enemy.posY
+            enemy.x = enemy.posX
             enemy.sx = 0
             enemy.sy = 0
             enemy.mission = "PROTEC"
@@ -69,8 +69,10 @@ function EnemyMission(enemy)
             enemy.sy = 0.35
             if enemy.y > ScreenH - (TileSize * 6) then
                 enemy.sy = 1
+            else
+                if T % 30 == 3 then FireSpread(enemy, 8) end
             end
-            if T % 32 == 3 then SpreadShot(enemy, 6) end
+            
         else
             enemy.sx = 0
             enemy.sy = 1
@@ -111,11 +113,11 @@ function PickAttacker()
         enemy.mission = "ATTAC"
         enemy.wait = 60
         enemy.shake = enemy.wait
-        Fire(enemy)
     end
 end
 
 function PickFire()
+    local down = math.pi / 2.0
     local idx = #Enemies - math.random(math.min(10, #Enemies)) + 1
     --print("Enemies: " .. #Enemies .. " chose: " .. idx)
     if idx > 0 and idx <= #Enemies then
@@ -125,6 +127,7 @@ function PickFire()
             return
         end
         Fire(enemy)
+        --FireSpread(enemy, 8, 2)
     end
 end
 

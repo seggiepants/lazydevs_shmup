@@ -10,25 +10,23 @@ require "bullets"
 
 -- To Do:
 -- --------------------
--- Enemy Behavior
 -- Enemy Shots
+-- - Aimed
+-- - Spread (done)
 -- Pickups
--- Bombs?
+-- Bombs
 -- Boss
+-- Scoring
 -- Nicer Screens
 
 -- DoggieZone
--- 1. More bullet designs (one per enemy now)
--- 2. Integrate shooting into an attack pattern (chungus fires spread while decending)
--- 3. Have an enemy aim a shot at you (red devil aims at you)
--- 4. Spread shots (chungus fires spread while decending - plain shot in PROTEC mode)
+-- 1. Play with spread shots make at least three different patterns. (spiral (default for enemies), wavy conic (for player spread shot), back-forth (didn't like that one))
+-- 2. Player shoots spread (done player spread shot)
+-- 3. Spreadshot with angle start/end (conic section) (done player spread shot)
 
 -- Other
 -- --------------------
--- Refactored input handling added joystick support, button b on title screen will exit game.
--- Reworked image tile loading, now pulls tile definitions from a json file for seamless tile size differences.
--- Added some images I will need in a couple of future episodes (boss, powerups)
--- Took out green eye alien color cycling, it was out of place.
+-- Lowered the volume of the player shot
 
 -- _INIT() in Pico-8
 function love.load()
@@ -416,27 +414,19 @@ function AddShot(x, y)
     end
 
     if ShotType == 3 then
-        for angle = 60, 120, 10 do
+        local offset = math.random() * 15
+        for angle = 60, 120, 20 do
             local newShot = {}
             for key, value in pairs(shot) do
                 newShot[key] = value
             end
 
-            newShot.sx = math.cos(math.rad(angle)) * 4
-            newShot.sy = math.sin(math.rad(angle)) * -4
+            newShot.sx = math.cos(math.rad(angle + offset)) * 4
+            newShot.sy = math.sin(math.rad(angle + offset)) * -4
             table.insert(Shots, newShot)
         end
     else
         table.insert(Shots, shot)
-    end
-end
-
-function AddShotSpray(centerX,centerY)
-    local speed = 1
-    local clrs = {10, 11, 8, 15}
-    for ang=0, 359, 60 do
-        local rad = math.rad(ang)
-        AddParticle(centerX, centerY, speed * math.cos(rad), speed * math.sin(rad), 8, clrs[love.math.random(1, #clrs)], 1)
     end
 end
 

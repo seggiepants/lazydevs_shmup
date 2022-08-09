@@ -210,7 +210,6 @@ function UpdateGame(dt)
             if shot.dead ~= true then
                 if Collide(enemy, Shots[j]) then
                     local shot = Shots[j]
-                    --AddShotSpray(shot.x + halfTile, shot.y + halfTile)
                     shot.dead = true
                     AddShockwave(shot.x + halfTile, shot.y + halfTile, false)
                     AddSpark(enemy.x + halfTile, enemy.y + halfTile)
