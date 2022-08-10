@@ -1,7 +1,7 @@
 {
     "prototypes": {
         "eye": {
-            "hp": 2
+            "hp": 3
             , "animationSpeed": 0.4
             , "frames": [13, 14, 15, 16]
         }
@@ -11,12 +11,12 @@
             , "frames": [26, 27, 28, 29]
         }
         , "devil": {
-            "hp": 1
+            "hp": 2
             , "animationSpeed": 0.3
             , "frames": [30, 31]
         }
         , "spinner": {
-            "hp": 2
+            "hp": 4
             , "animationSpeed": 0.3
             , "frames": [17, 18, 19, 20]
         }
@@ -34,6 +34,7 @@
     , "waves": [
         {
             "name": "Wave 1"
+            , "description": "Space Invaders"
             , "attackFrequency": 60
             , "formation": [
                   ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
@@ -44,6 +45,7 @@
         }
         , {
             "name": "Wave 2"
+            , "description": "Delta Formation"
             , "attackFrequency": 60
             , "formation": [
                   ["spinner", "jelly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "jelly", "spinner"]
@@ -54,6 +56,18 @@
         }
         , {
             "name": "Wave 3"
+            , "description": "Dive Bomb"
+            , "attackFrequency": 60
+            , "formation": [
+                ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+              , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+              , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+              , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+          ]
+        }
+        , {
+            "name": "Wave 4"
+            , "description": "Zeta Formation"
             , "attackFrequency": 60
             , "formation": [
                   ["butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly"]
@@ -64,7 +78,8 @@
             ]
         }
         , {
-            "name": "Wave 4"
+            "name": "Wave 5"
+            , "description": "Sneak Attack"
             , "attackFrequency": 60
             , "formation": [
                   ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
@@ -74,7 +89,8 @@
             ]
         }
         , {
-            "name": "Wave 5"
+            "name": "Wave 6"
+            , "description": "Ordered Formation"
             , "attackFrequency": 60
             , "formation": [
                   ["butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly"]
@@ -84,7 +100,8 @@
             ]
         }
         , {
-            "name": "Wave 6"
+            "name": "Wave 7"
+            , "description": "Dive Bomb II"
             , "attackFrequency": 60
             , "formation": [
                   ["", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", ""]
@@ -94,7 +111,8 @@
             ]
         }
         , {
-            "name": "Wave 7"
+            "name": "Wave 8"
+            , "description": "Fortified Shooter"
             , "attackFrequency": 60
             , "formation": [
                   ["", "devil", "", "devil", "", "devil", "", "devil", "", "devil"]
@@ -104,7 +122,8 @@
             ]
         }
         , {
-            "name": "Wave 8"
+            "name": "Wave 9"
+            , "description": "The Big One"
             , "attackFrequency": 60
             , "formation": [
                   ["", "", "", "", "chungus", "", "", "", "", ""]
@@ -114,7 +133,8 @@
             ]
         }
         , {
-            "name": "Wave 9"
+            "name": "Wave 10"
+            , "description": "Full Assault"
             , "attackFrequency": 10
             , "formation": [
                   ["", "", "", "butterfly", "chungus", "", "butterfly", "", "", ""]

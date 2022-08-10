@@ -118,6 +118,15 @@ end
 
 function PickFire()
     local down = math.pi / 2.0
+
+    for _, enemy in pairs(Enemies) do
+        if enemy.enemyType == "chungus" and enemy.mission == "PROTEC" then
+            if math.random() < 0.5 then
+                FireSpread(enemy, 8, 1.5)
+                return
+            end
+        end
+    end
     local idx = #Enemies - math.random(math.min(10, #Enemies)) + 1
     --print("Enemies: " .. #Enemies .. " chose: " .. idx)
     if idx > 0 and idx <= #Enemies then

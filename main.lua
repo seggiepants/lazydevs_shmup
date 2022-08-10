@@ -10,23 +10,19 @@ require "bullets"
 
 -- To Do:
 -- --------------------
--- Enemy Shots
--- - Aimed
--- - Spread (done)
+-- Create New Levels
 -- Pickups
 -- Bombs
--- Boss
 -- Scoring
+-- Boss
 -- Nicer Screens
 
 -- DoggieZone
--- 1. Watch "The Art of ScreenShake" by Jan Willem Nijman 
---    see "Juice it or Lose it" too (done)
--- 2. Revisit levels want 6+ (changed one level, and added a new one, have 9 now)
+-- 1. Figure out what the pickups do -- gonna go with extra points and extra life every 10 we will do bombs later
 
 -- Other
 -- --------------------
--- Lowered the volume of the player shot
+-- 
 
 -- _INIT() in Pico-8
 function love.load()
@@ -66,6 +62,12 @@ function love.load()
         , {255/255, 119/255, 168/255, 1.0}
         , {255/255, 204/255, 170/255, 1.0}}
 
+        PalPink = {Pal[15], Pal[15], Pal[15], Pal[15],
+                    Pal[15], Pal[15], Pal[15], Pal[15],
+                    Pal[15], Pal[15], Pal[15], Pal[15],
+                    Pal[15], Pal[15], Pal[15], Pal[15],
+                }
+        
         PalWhite = {Pal[8], Pal[8], Pal[8], Pal[8],
                     Pal[8], Pal[8], Pal[8], Pal[8],
                     Pal[8], Pal[8], Pal[8], Pal[8],
@@ -117,7 +119,10 @@ function love.load()
         Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
         Sfx["enemyShot"] = love.audio.newSource("audio/enemyShot.wav", "static")
         Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
+        Sfx["lifeUp"] = love.audio.newSource("audio/lifeUp.wav", "static")
         Sfx["nextWave"] = love.audio.newSource("audio/spawnWave.wav", "static")
+        Sfx["pickup"] = love.audio.newSource("audio/pickup.wav", "static")
+
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
         Music["game"] = love.audio.newSource("audio/gameplay.xm", "stream")
@@ -138,6 +143,7 @@ function love.load()
         Stars = {}
         Enemies = {}
         Particles = {}
+        Pickups = {}
         Shockwaves = {}
         ShootOK = true
         SwitchOK = true
@@ -165,6 +171,7 @@ function love.load()
         T = 0
         Wave = 0
         Shake = 0
+        Cherries = 0
         Keys = {}
         KeysPrev = {}
         CurrentJoystick = 0
@@ -270,7 +277,7 @@ function AddExplosion(centerX,centerY, isBlue)
     particle.isBlue = isBlue
     table.insert(Particles, particle)
 
-    AddShockwave(centerX, centerY, true)
+    AddShockwave(centerX, centerY, nil, true)
 
     -- beams
     local speed = 1.5
@@ -348,7 +355,7 @@ function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
     table.insert(Particles, particle)
 end
 
-function AddShockwave(x, y, isBig)
+function AddShockwave(x, y, clr, isBig)
     local shockwave = {}
     shockwave.x = x
     shockwave.y = y
@@ -362,6 +369,7 @@ function AddShockwave(x, y, isBig)
         shockwave.speed = 1
         shockwave.clr = 10
     end
+    if clr ~= nil then shockwave.clr = clr end
     table.insert(Shockwaves, shockwave)
 end
 

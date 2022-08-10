@@ -135,6 +135,13 @@ function UpdateGame(dt)
         end
     end
 
+    -- Remove "dead" pickups
+    for i = #Pickups, 1, -1  do
+        if Pickups[i].dead == true then
+            table.remove(Pickups, i)
+        end
+    end
+
     -- Move the bullet
     for i, shot in pairs(Shots)  do
         if shot.ShotType == 4 then -- wave
@@ -165,6 +172,16 @@ function UpdateGame(dt)
         end
     end
 
+    -- Move pickups
+    for _, pickup in pairs(Pickups)  do
+        Move(pickup)
+        if pickup.y < -1 * TileSize or
+            pickup.y > ScreenH + TileSize or
+            pickup.x < -1 * TileSize or
+            pickup.x > ScreenW + TileSize then
+            pickup.dead = true
+        end
+    end
     PickTimer()
 
     -- Move the enemies
@@ -211,7 +228,7 @@ function UpdateGame(dt)
                 if Collide(enemy, Shots[j]) then
                     local shot = Shots[j]
                     shot.dead = true
-                    AddShockwave(shot.x + halfTile, shot.y + halfTile, false)
+                    AddShockwave(shot.x + halfTile, shot.y + halfTile, nil, false)
                     AddSpark(enemy.x + halfTile, enemy.y + halfTile)
                     enemy.hp = enemy.hp - 1
                     enemy.flash = FlashTimeoutMax
@@ -263,6 +280,24 @@ function UpdateGame(dt)
         end
     end
 
+    -- Collision Ship x Pickups
+    for _, pickup in pairs(Pickups) do
+        if Collide(Ship, pickup) then
+            pickup.dead = true
+            love.audio.play(Sfx["pickup"])
+            Cherries = Cherries + 1
+            --[[ doggie zone ]]--
+            if Cherries >= 10 and Cherries % 10 == 0 and Lives < 4 then
+                Lives = Lives + 1
+                Cherries = 0
+                love.audio.play(Sfx["lifeUp"])
+            end
+            Score = Score + 1
+            --
+            AddShockwave(pickup.x + math.floor(pickup.width / 2), pickup.y + math.floor(pickup.height /2), 15, false)
+        end
+    end
+    
     -- Animate Muzzle flash
     if Muzzle >0 then
         Muzzle = Muzzle - 2
@@ -346,6 +381,16 @@ function UpdateWin(dt)
     end
 end
 
+function DropPickup(x, y)
+    -- sprite = 42
+    local pickup = MakeSprite({ 
+        x = x
+        , y = y
+        , sprite = 42
+        , sy = 0.5})
+    table.insert(Pickups, pickup)
+end
+
 function KillEnemy(i)
     local enemy = Enemies[i]
     if enemy == nil then return end
@@ -353,6 +398,9 @@ function KillEnemy(i)
     local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
     AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
     Score = Score + 1
+    if math.random() < 0.2 then
+        DropPickup(enemy.x, enemy.y)
+    end
 
     if enemy.mission == "ATTAC" and math.random() < 0.5 then
         PickAttacker()
@@ -365,10 +413,12 @@ function StartGame()
     Enemies = {}
     EnemyShots = {}
     Particles = {}
+    Pickups = {}
     Shockwaves = {}
     Shots = {}
     Stars = {}
 
+    Cherries = 0
     Wave = 0
     NextWave()
     Ship = MakeSprite(ShipPrototype)

@@ -21,6 +21,14 @@ function DrawGame()
         --Pset(particle.x, particle.y, 8) --particle.clr)
     end
 
+    -- Draw Pickups
+    for _, pickup in pairs(Pickups) do
+        local pal
+        if T % 16 < 8 then pal = PalWhite else pal = PalPink end
+        DrawOutline(pickup, pal)
+        DrawSprite(pickup)
+    end
+
     -- Draw Enemies
     for key, enemy in pairs(Enemies) do
         if enemy.flash > 0 then
@@ -93,6 +101,10 @@ function DrawGame()
             Spr(10, i * 9 - 8, 1)
         end
     end
+    Spr(42, (ScreenW - (TileSize * 3)), 2)
+    love.graphics.setColor(Pal[15])
+    love.graphics.print(tostring(Cherries), ScreenW - (TileSize * 1.5), 1)
+
 end
 
 function DrawGetReady()
@@ -123,6 +135,16 @@ function DrawGetReady()
         countDown = "GO!"
     end
     CenterPrint(countDown, 60, clr)
+end
+
+function DrawOutline(obj, pal)
+    RecolorShader:send("Target", unpack(pal)) 
+    love.graphics.setShader(RecolorShader)
+    Spr(obj.sprite, obj.x + 1, obj.y)
+    Spr(obj.sprite, obj.x - 1, obj.y)
+    Spr(obj.sprite, obj.x, obj.y + 1)
+    Spr(obj.sprite, obj.x, obj.y - 1)
+    love.graphics.setShader()
 end
 
 function DrawSprite(sprite)
@@ -210,7 +232,13 @@ end
 function DrawWaveText()
     DrawGame()
     --CenterPrint("Wave " .. Wave, 60, Blink())
-    CenterPrint(LevelJson["waves"][Wave]["name"], 60, Blink())
+    local name = LevelJson["waves"][Wave]["name"]
+    local description = LevelJson["waves"][Wave]["description"]
+    local textHeight = 8
+    local y = math.floor((ScreenH - textHeight) / 2)
+    if description ~= nil then y =  math.floor((ScreenH - (textHeight * 3)) / 2) end
+    CenterPrint(name, y, Blink())
+    if description ~= nil then CenterPrint(description, y + (textHeight * 2), Blink()) end
 end
 
 function DrawWin()
