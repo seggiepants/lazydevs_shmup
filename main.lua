@@ -20,9 +20,9 @@ require "bullets"
 -- Nicer Screens
 
 -- DoggieZone
--- 1. Play with spread shots make at least three different patterns. (spiral (default for enemies), wavy conic (for player spread shot), back-forth (didn't like that one))
--- 2. Player shoots spread (done player spread shot)
--- 3. Spreadshot with angle start/end (conic section) (done player spread shot)
+-- 1. Watch "The Art of ScreenShake" by Jan Willem Nijman 
+--    see "Juice it or Lose it" too (done)
+-- 2. Revisit levels want 6+ (changed one level, and added a new one, have 9 now)
 
 -- Other
 -- --------------------
@@ -163,7 +163,8 @@ function love.load()
         ShotTimeoutMax = 4
         FlashTimeoutMax = 2
         T = 0
-        Wave = 1
+        Wave = 0
+        Shake = 0
         Keys = {}
         KeysPrev = {}
         CurrentJoystick = 0
@@ -177,7 +178,7 @@ function love.draw()
     -- scale to Pico-8 screen size
     love.graphics.push()
     love.graphics.scale(ScreenScale, ScreenScale)
-    
+    ScreenShake()
     if Mode == "GAME" then
         DrawGame()
     elseif Mode == "GET_READY" then
@@ -255,14 +256,6 @@ function love.update(dt)
 end
 
 function AddExplosion(centerX,centerY, isBlue)
-    --[[
-    local explosion = {}
-    local x, y, w, h = Quads[SprExplosion]:getViewport()
-    explosion.age = 1
-    explosion.x = centerX - (w / 2)
-    explosion.y = centerY - (h / 2)
-    table.insert(Explosions, explosion)
-    ]]--
     -- center
     local particle = {}
     particle.isExplosion = true
@@ -691,5 +684,20 @@ function ReadInput()
                 --  Centered, let the 1st axis fall through
             end
         end
+    end
+end
+
+function ScreenShake()
+    if Shake <= 0 then return end
+    local x = math.random() * Shake - (Shake / 2)
+    local y = math.random() * Shake - (Shake / 2)
+    love.graphics.translate(x, y)
+    if Shake > 10 then
+        Shake = Shake * 0.9
+    else
+        Shake = Shake - 1
+    end
+    if Shake < 0 then
+        Shake = 0
     end
 end

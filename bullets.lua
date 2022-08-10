@@ -19,6 +19,14 @@ function Fire(enemy, ang, speed)
 
     enemy.flash = 8
     love.audio.play(Sfx["enemyShot"])
+    return shot
+end
+
+function FireAimed(enemy, speed)
+    local shot = Fire(enemy, 0, speed)
+    local angle = math.atan2((Ship.y + math.floor(Ship.height / 2)) - (shot.y + math.floor(shot.height / 2)), (Ship.x + math.floor(Ship.width / 2)) - (shot.x + math.floor(shot.width / 2)))
+    shot.sx = math.cos(angle) * speed
+    shot.sy = math.sin(angle) * speed
 end
 
 function FireSpread(enemy, numShots, speed)
@@ -83,9 +91,6 @@ function PrepareShot(enemy)
             , sy = 1.5
         }
     elseif enemy.enemyType == "devil" then
-        local dy = (Ship.y + math.floor(Ship.height / 2)) - (enemy.y + math.floor(enemy.height / 2))
-        local dx = (Ship.x + math.floor(Ship.width / 2)) - (enemy.x + math.floor(enemy.width / 2))
-        local theta = math.atan2(dy, dx)
         shotPrototype = {
             animationSpeed = 0.4
             , frames = {59, 60}
@@ -93,8 +98,8 @@ function PrepareShot(enemy)
             , colY = 5
             , colWidth = 3
             , colHeight = 2
-            , sy = 3 * math.sin(theta)
-            , sx = 3 * math.cos(theta)
+            , sy = 2
+            , sx = 0
         }
     elseif enemy.enemyType == "spinner" then
         shotPrototype = {

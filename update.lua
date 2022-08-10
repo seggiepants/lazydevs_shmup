@@ -232,6 +232,7 @@ function UpdateGame(dt)
         for i = #Enemies, 1, -1 do
             if Collide(Ship, Enemies[i]) then
                 Lives = Lives - 1
+                Shake = 12
                 Ship.invulnerable = InvulnerableMax
                 love.audio.play(Sfx["hurt"])
                 table.remove(Enemies, i)
@@ -249,6 +250,7 @@ function UpdateGame(dt)
         for i = #EnemyShots, 1, -1 do
             if Collide(Ship, EnemyShots[i]) then
                 Lives = Lives - 1
+                Shake = 12
                 Ship.invulnerable = InvulnerableMax
                 love.audio.play(Sfx["hurt"])
                 table.remove(EnemyShots, i)
@@ -361,13 +363,17 @@ end
 function StartGame()
     T = 0
     Enemies = {}
+    EnemyShots = {}
+    Particles = {}
+    Shockwaves = {}
     Shots = {}
     Stars = {}
+
     Wave = 0
     NextWave()
     Ship = MakeSprite(ShipPrototype)
     Ship.x = (ScreenW - TileSize) / 2
-    Ship.y = (ScreenH - TileSize) / 2
+    Ship.y = (ScreenH - (TileSize * 3))
     Ship.sx = 0
     Ship.sy = 0
     Ship.spriteIndex = 2

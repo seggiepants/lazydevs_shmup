@@ -70,7 +70,7 @@ function EnemyMission(enemy)
             if enemy.y > ScreenH - (TileSize * 6) then
                 enemy.sy = 1
             else
-                if T % 30 == 3 then FireSpread(enemy, 8) end
+                if T % 25 == 3 then FireSpread(enemy, 8, 1.5) end
             end
             
         else
@@ -126,8 +126,13 @@ function PickFire()
         if enemy.mission ~= "PROTEC" then
             return
         end
-        Fire(enemy)
-        --FireSpread(enemy, 8, 2)
+        if enemy.enemyType == "chungus" then
+            FireSpread(enemy, 8, 1.5)
+        elseif enemy.enemyType == "devil" then
+            FireAimed(enemy, 2)
+        else
+            Fire(enemy)
+        end
     end
 end
 
