@@ -81,6 +81,14 @@ function UpdateGame(dt)
         Ship.deadTime = Ship.deadTime + 1
     end
 
+    if PowerupTimeout > 0 then
+        PowerupTimeout = PowerupTimeout - 1
+        if PowerupTimeout <= 0 then
+            ShotType = 1
+            love.audio.play(Sfx["weaponPowerdown"])
+        end
+    end
+
     -- Animate Shockwaves
     for i = #Shockwaves, 1, -1 do
         local shockwave = Shockwaves[i]
@@ -284,15 +292,25 @@ function UpdateGame(dt)
     for _, pickup in pairs(Pickups) do
         if Collide(Ship, pickup) then
             pickup.dead = true
-            love.audio.play(Sfx["pickup"])
-            Cherries = Cherries + 1
-            --[[ doggie zone ]]--
-            if Cherries >= 10 and Cherries % 10 == 0 and Lives < 4 then
-                Lives = Lives + 1
-                Cherries = 0
-                love.audio.play(Sfx["lifeUp"])
+            if pickup.sprite == CherrySpr then
+                love.audio.play(Sfx["pickup"])
+                Cherries = Cherries + 1
+                if Cherries >= 10 and Lives < 4 then
+                    Lives = Lives + 1
+                    Cherries = Cherries - 10
+                    love.audio.play(Sfx["lifeUp"])
+                end
+                Score = Score + 1
+            else
+                for i, shotType in pairs(ShotTypes) do
+                    if shotType.sprite == pickup.sprite then
+                        PowerupTimeout = 300
+                        ShotType = i
+                        love.audio.play(Sfx["weaponPowerup"])
+                        break
+                    end
+                end
             end
-            Score = Score + 1
             --
             AddShockwave(pickup.x + math.floor(pickup.width / 2), pickup.y + math.floor(pickup.height /2), 15, false)
         end
@@ -381,12 +399,12 @@ function UpdateWin(dt)
     end
 end
 
-function DropPickup(x, y)
+function DropPickup(x, y, spr)
     -- sprite = 42
     local pickup = MakeSprite({ 
         x = x
         , y = y
-        , sprite = 42
+        , sprite = spr
         , sy = 0.5})
     table.insert(Pickups, pickup)
 end
@@ -399,7 +417,10 @@ function KillEnemy(i)
     AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
     Score = Score + 1
     if math.random() < 0.2 then
-        DropPickup(enemy.x, enemy.y)
+        DropPickup(enemy.x, enemy.y, CherrySpr)
+    elseif math.random() < 0.05 then
+        local shotType = math.random(#ShotTypes)
+        DropPickup(enemy.x, enemy.y, ShotTypes[shotType].sprite)
     end
 
     if enemy.mission == "ATTAC" and math.random() < 0.5 then
@@ -436,6 +457,7 @@ function StartGame()
     Muzzle = 0
     Score = 0
     Lives = 4
+    PowerupTimeout = 0
     local starClr = {6, 7, 8, 16}
     for i=1,100 do
         local star = {} 

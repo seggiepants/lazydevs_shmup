@@ -19,7 +19,8 @@ require "bullets"
 
 -- DoggieZone
 -- 1. Figure out what the pickups do -- gonna go with extra points and extra life every 10 we will do bombs later
-
+--    I also added powerups for the different shot types.
+-- 
 -- Other
 -- --------------------
 -- 
@@ -122,6 +123,8 @@ function love.load()
         Sfx["lifeUp"] = love.audio.newSource("audio/lifeUp.wav", "static")
         Sfx["nextWave"] = love.audio.newSource("audio/spawnWave.wav", "static")
         Sfx["pickup"] = love.audio.newSource("audio/pickup.wav", "static")
+        Sfx["weaponPowerup"] = love.audio.newSource("audio/weaponPowerup.wav", "static")
+        Sfx["weaponPowerdown"] = love.audio.newSource("audio/weaponPowerdown.wav", "static")
 
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
@@ -151,16 +154,21 @@ function love.load()
         ShotTypes = {
             {
                 frames = {11}
+                , sprite = 43
             }, 
             {
                 frames = {53}
+                , sprite = 44
             }, 
             {
                 frames = {54}
+                , sprite = 45
             }, 
             {
                 frames = {55}
+                , sprite = 46
             }} -- Fire Ball, Laser, Spread, Wave
+        CherrySpr = 42
         Shots = {}
         EnemyShots = {}
         ButtonReady = false
