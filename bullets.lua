@@ -1,4 +1,35 @@
--- Bullets
+function CherryBomb()
+    local speed = 4
+    local sprite = 12
+    local start = (5 * math.pi) / 4.0
+    local spacing = (math.pi / 2.0)/(Cherries * 2)
+    for i = 0,Cherries * 2 do
+        local angle = start + (spacing * i)
+        local bullet = MakeSprite({ 
+            x = Ship.x + (Ship.width / 2)
+            , y = Ship.y + (Ship.height / 2)
+            , sprite = sprite
+            , sy = -4})
+        bullet.colX = 0
+        bullet.colY = 0
+        bullet.colWidth = 8
+        bullet.colHeight = 8
+        bullet.age = 0
+        bullet.maxAge = 100
+        bullet.x = bullet.x - (bullet.width /  2)
+        bullet.y = bullet.y - (bullet.height / 2)
+        bullet.sx = math.cos(angle) * speed
+        bullet.sy = math.sin(angle) * speed
+        bullet.damage = 3
+        table.insert(Shots, bullet)
+    end
+    love.audio.play(Sfx["cherryBomb"])
+    AddShockwave(Ship.x + (Ship.width / 2), Ship.y + (Ship.height / 2), nil, true)
+    Shake = 15
+    Muzzle = 5
+    Ship.invulnerable = 30
+    ShowSkull = 1
+end
 
 function Fire(enemy, ang, speed)
     local shotPrototype = PrepareShot(enemy)

@@ -49,16 +49,14 @@ function UpdateGame(dt)
         ButtonReady = true
     end
 
-    if Btn("b") then
-        if SwitchOK then
-            ShotType = ShotType + 1
-            if ShotType > 4 then
-                ShotType = 1
-            end
-            SwitchOK = false
+    if Btnp("b") then
+        if Cherries > 0 then
+            CherryBomb()
+            Cherries = 0
+        else
+            love.audio.play(Sfx["bombFail"])
         end
     else
-        SwitchOK = true
     end
     
     -- Moving the ship
@@ -150,6 +148,17 @@ function UpdateGame(dt)
         end
     end
 
+    -- Update/Remove "dead" floats
+    for i = #Floats, 1, -1 do
+        if Floats[i].age > 60 then
+            table.remove(Floats, i)
+        else
+            local float = Floats[i]
+            float.y = float.y - 0.5
+            float.age = float.age + 1
+        end
+    end
+
     -- Move the bullet
     for i, shot in pairs(Shots)  do
         if shot.ShotType == 4 then -- wave
@@ -238,7 +247,9 @@ function UpdateGame(dt)
                     shot.dead = true
                     AddShockwave(shot.x + halfTile, shot.y + halfTile, nil, false)
                     AddSpark(enemy.x + halfTile, enemy.y + halfTile)
-                    enemy.hp = enemy.hp - 1
+                    local damage = shot.damage
+                    if damage == nil then damage = 1 end
+                    enemy.hp = enemy.hp - damage
                     enemy.flash = FlashTimeoutMax
                     if enemy.hp <= 0 then
                         KillEnemy(i)
@@ -292,27 +303,7 @@ function UpdateGame(dt)
     for _, pickup in pairs(Pickups) do
         if Collide(Ship, pickup) then
             pickup.dead = true
-            if pickup.sprite == CherrySpr then
-                love.audio.play(Sfx["pickup"])
-                Cherries = Cherries + 1
-                if Cherries >= 10 and Lives < 4 then
-                    Lives = Lives + 1
-                    Cherries = Cherries - 10
-                    love.audio.play(Sfx["lifeUp"])
-                end
-                Score = Score + 1
-            else
-                for i, shotType in pairs(ShotTypes) do
-                    if shotType.sprite == pickup.sprite then
-                        PowerupTimeout = 300
-                        ShotType = i
-                        love.audio.play(Sfx["weaponPowerup"])
-                        break
-                    end
-                end
-            end
-            --
-            AddShockwave(pickup.x + math.floor(pickup.width / 2), pickup.y + math.floor(pickup.height /2), 15, false)
+            PickupLogic(pickup)
         end
     end
     
@@ -405,27 +396,35 @@ function DropPickup(x, y, spr)
         x = x
         , y = y
         , sprite = spr
-        , sy = 0.5})
+        , sy = 0.75})
     table.insert(Pickups, pickup)
 end
 
 function KillEnemy(i)
+    local cherryChance = 0.1
     local enemy = Enemies[i]
     if enemy == nil then return end
     love.audio.play(Sfx["enemyHit"])
     local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
     AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
     Score = Score + 1
-    if math.random() < 0.2 then
+
+    if enemy.mission == "ATTAC" then
+        if math.random() < 0.5 then
+            PickAttacker()
+        end
+        CherryChance = 0.2
+        AddFloat("10", enemy.x + (enemy.width / 2), enemy.y + (enemy.height / 2))
+        Score = Score + 10
+    end
+
+    if math.random() < cherryChance then
         DropPickup(enemy.x, enemy.y, CherrySpr)
     elseif math.random() < 0.05 then
         local shotType = math.random(#ShotTypes)
         DropPickup(enemy.x, enemy.y, ShotTypes[shotType].sprite)
     end
 
-    if enemy.mission == "ATTAC" and math.random() < 0.5 then
-        PickAttacker()
-    end
     table.remove(Enemies, i)
 end
 
@@ -458,6 +457,7 @@ function StartGame()
     Score = 0
     Lives = 4
     PowerupTimeout = 0
+    ShowSkull = 0
     local starClr = {6, 7, 8, 16}
     for i=1,100 do
         local star = {} 
@@ -467,7 +467,6 @@ function StartGame()
         table.insert(Stars, star)
     end
     ShootOK = true
-    SwitchOK = true
     ShotType = 1
     ButtonReady = false    
 end

@@ -161,3 +161,33 @@ function PickTimer()
 
     --return enemy
 end
+
+function PickupLogic(pickup)
+    if pickup.sprite == CherrySpr then
+        love.audio.play(Sfx["pickup"])
+        Cherries = Cherries + 1
+        if Cherries >= 10 and Lives < 4 then
+            Lives = Lives + 1
+            Cherries = Cherries - 10
+            love.audio.play(Sfx["lifeUp"])
+            AddFloat("1UP!", pickup.x + pickup.width / 2, pickup.y + pickup.height / 2)
+        elseif Cherries >= 10 then
+            -- Bombs
+            Score = Score + Cherries
+            Cherries = 0
+        end
+        Score = Score + 1
+    else
+        for i, shotType in pairs(ShotTypes) do
+            if shotType.sprite == pickup.sprite then
+                PowerupTimeout = 300
+                ShotType = i
+                love.audio.play(Sfx["weaponPowerup"])
+                AddFloat(ShotTypes[i].name, pickup.x + pickup.width / 2, pickup.y + pickup.height / 2)
+                break
+            end
+        end
+    end
+    --
+    AddShockwave(pickup.x + math.floor(pickup.width / 2), pickup.y + math.floor(pickup.height /2), 15, false)
+end

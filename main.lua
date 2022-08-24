@@ -10,16 +10,15 @@ require "bullets"
 
 -- To Do:
 -- --------------------
--- Create New Levels
--- Pickups
 -- Bombs
 -- Scoring
 -- Boss
 -- Nicer Screens
 
 -- DoggieZone
--- 1. Figure out what the pickups do -- gonna go with extra points and extra life every 10 we will do bombs later
---    I also added powerups for the different shot types.
+-- 1. Another type of powerup -- Done added short term shot boosts.
+-- 2. More impressive bomb effect. Particles, trails, etc. Added large transparent scaling skull (pretend that is my boss design)
+-- 3. Create a Boss sprite - Done past me copied it from a future episode 
 -- 
 -- Other
 -- --------------------
@@ -102,7 +101,19 @@ function love.load()
                 #endif
             ]]
         )
-        RecolorShader:send("Pal", unpack(Pal)) 
+        RecolorShader:send("Pal", unpack(Pal))
+        
+        -- Stolen/modified from https://love2d.org/forums/viewtopic.php?t=84137
+        TransparentShader = love.graphics.newShader(
+            [[
+            extern float alpha;
+            vec4 effect(vec4 color, Image texture, vec2 tc, vec2 sc) {
+                vec4 c = Texel(texture, tc);
+                return vec4(c.r, c.g, c.b, c.a * alpha);
+            }
+            ]]
+        )
+        TransparentShader:send("alpha", 0.5)
 
         local levelTxt = love.filesystem.read("/levels/level.json")
         LevelJson = Json.decode(levelTxt)
@@ -125,6 +136,8 @@ function love.load()
         Sfx["pickup"] = love.audio.newSource("audio/pickup.wav", "static")
         Sfx["weaponPowerup"] = love.audio.newSource("audio/weaponPowerup.wav", "static")
         Sfx["weaponPowerdown"] = love.audio.newSource("audio/weaponPowerdown.wav", "static")
+        Sfx["bombFail"] = love.audio.newSource("audio/bombFail.wav", "static")
+        Sfx["cherryBomb"] = love.audio.newSource("audio/cherryBomb.wav", "static")
 
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
@@ -145,28 +158,32 @@ function love.load()
         Lockout = 0
         Stars = {}
         Enemies = {}
+        Floats = {}
         Particles = {}
         Pickups = {}
         Shockwaves = {}
         ShootOK = true
-        SwitchOK = true
         ShotType = 1
         ShotTypes = {
             {
                 frames = {11}
                 , sprite = 43
+                , name = "Vulcan"
             }, 
             {
                 frames = {53}
                 , sprite = 44
+                , name = "Laser"
             }, 
             {
                 frames = {54}
                 , sprite = 45
+                , name = "Spread"
             }, 
             {
                 frames = {55}
                 , sprite = 46
+                , name = "Wave"
             }} -- Fire Ball, Laser, Spread, Wave
         CherrySpr = 42
         Shots = {}
@@ -350,6 +367,15 @@ function AddExplosion(centerX,centerY, isBlue)
     end
 end
 
+function AddFloat(text, x, y)
+    local float = {}
+    float.x = x
+    float.y = y
+    float.text = text
+    float.age = 0
+    table.insert(Floats, float)
+end
+
 function AddParticle(x, y, sx, sy, lifeTime, clr, radius)
     local particle = {}
     particle.x = x
@@ -404,6 +430,7 @@ function AddShot(x, y)
     shot.y = y
     shot.sx = 0
     shot.sy = -4
+    shot.damage = 1
     shot.age = 0
     shot.maxAge = 300
 

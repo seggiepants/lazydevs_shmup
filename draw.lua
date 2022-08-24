@@ -90,6 +90,34 @@ function DrawGame()
         -- debug -- love.graphics.rectangle("line", shot.x + shot.colX - 1, shot.y + shot.colY - 1, shot.colWidth, shot.colHeight)
         -- debug -- love.graphics.setColor(1, 1, 1)
     end
+
+    if ShowSkull > 0 then
+        local skullSpr = 76
+        if T % 8 < 4 then skullSpr = 77 end
+        local scale = 1.0 + ((ShowSkull - 1) / 20.0)
+        local skullX, skullY, skullW, skullH = Quads[skullSpr]:getViewport()
+        skullX = ((ScreenW / scale) - skullW) / 2
+        skullY = ((ScreenH / scale) - skullH) / 2
+        love.graphics.setShader(TransparentShader)
+        love.graphics.push()
+        love.graphics.scale(scale, scale)
+        Spr(skullSpr, skullX, skullY)
+        love.graphics.pop()
+        love.graphics.setShader()
+        ShowSkull = ShowSkull + 1
+        if ShowSkull > 40 then
+            ShowSkull = 0
+        end
+    end
+
+    -- Draw Floats
+    for _, float in pairs(Floats) do
+        local clr = 8
+        if T % 4 < 2 then
+            clr = 9
+        end
+        PointPrint(float.text, float.x, float.y, clr)
+    end
     
     love.graphics.setColor(Pal[12])
     love.graphics.print("Score: " .. Score, 40, 1)
@@ -212,7 +240,6 @@ function DrawStart()
     Spr(57, ScreenW - TileSize - 10, 10)
     Spr(56, 10, ScreenH - TileSize - 10)
     Spr(57, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
-    
     --[[
     if (T % 8 < 4) then
         Spr(30, 48, 56) -- Red Bat
@@ -265,6 +292,13 @@ function CenterPrint(message, y, clr)
     love.graphics.setColor(Pal[clr])
     local x = (ScreenW - Font8:getWidth(message)) / 2
     love.graphics.print(message, x, y)
+end
+
+function PointPrint(message, x, y, clr)
+    love.graphics.setColor(Pal[clr])
+    local posX = x - (Font8:getWidth(message) / 2)
+    local posY = y - (Font8:getHeight(message) / 2)
+    love.graphics.print(message, posX, posY)
 end
 
 function Pset(x, y, clr)
