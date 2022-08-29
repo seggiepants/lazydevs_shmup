@@ -7,22 +7,19 @@ require "update"
 require "enemies"
 require "behavior"
 require "bullets"
+require "boss"
 
 -- To Do:
 -- --------------------
--- Bombs
 -- Scoring
--- Boss
 -- Nicer Screens
 
 -- DoggieZone
--- 1. Another type of powerup -- Done added short term shot boosts.
--- 2. More impressive bomb effect. Particles, trails, etc. Added large transparent scaling skull (pretend that is my boss design)
--- 3. Create a Boss sprite - Done past me copied it from a future episode 
+-- 1. Playtest the game, find bugs, balance problems. 
 -- 
 -- Other
 -- --------------------
--- 
+-- Need Boss Music, and SFX: Boss Explosion, Boss Death sound, Boss Intro sound (on flyin)
 
 -- _INIT() in Pico-8
 function love.load()
@@ -61,6 +58,12 @@ function love.load()
         , {131/255, 118/255, 156/255, 1.0}
         , {255/255, 119/255, 168/255, 1.0}
         , {255/255, 204/255, 170/255, 1.0}}
+
+        PalBoss = {Pal[1], Pal[2], Pal[3], Pal[9],
+                    Pal[5], Pal[6], Pal[7], Pal[8],
+                    Pal[9], Pal[10], Pal[11], Pal[15],
+                    Pal[13], Pal[14], Pal[15], Pal[16],
+                }
 
         PalPink = {Pal[15], Pal[15], Pal[15], Pal[15],
                     Pal[15], Pal[15], Pal[15], Pal[15],
@@ -138,6 +141,7 @@ function love.load()
         Sfx["weaponPowerdown"] = love.audio.newSource("audio/weaponPowerdown.wav", "static")
         Sfx["bombFail"] = love.audio.newSource("audio/bombFail.wav", "static")
         Sfx["cherryBomb"] = love.audio.newSource("audio/cherryBomb.wav", "static")
+        Sfx["bossShoot"] = love.audio.newSource("audio/bossShoot.wav", "static")
 
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
@@ -193,10 +197,12 @@ function love.load()
         InvulnerableMax = 60
         ShotTimeoutMax = 4
         FlashTimeoutMax = 2
+        FlashTimeoutBoss = 5
         T = 0
         Wave = 0
         Shake = 0
         Cherries = 0
+        -- Debug = "chicken"
         Keys = {}
         KeysPrev = {}
         CurrentJoystick = 0
@@ -224,7 +230,10 @@ function love.draw()
     elseif Mode == "WIN" then
         DrawWin()
     end
-
+    --[[ if #Debug > 0 then
+        love.graphics.setColor(Pal[8])
+        love.graphics.print(Debug, 1, 1)
+    end ]]
     -- restore screen size
     love.graphics.pop()
 end
@@ -285,6 +294,73 @@ function love.update(dt)
     if Btnp("printScr") then
         love.graphics.captureScreenshot("screenshot" .. os.time() .. ".png")        
     end
+end
+
+function AddBigExplosion(centerX, centerY)
+    -- center
+    local particle = {}
+    particle.isExplosion = true
+    particle.x = centerX
+    particle.y = centerY
+    particle.radius = 30
+    particle.clr = 8
+    particle.sx = 0
+    particle.sy = 0
+    particle.age = 0
+    particle.maxAge = 10
+    table.insert(Particles, particle)
+
+    AddShockwave(centerX, centerY, nil, true)
+
+    local speed = 12
+    local clrs = {10, 11, 8, 15}
+    for i = 1, 60 do
+        local particle = {}
+        particle.x = centerX
+        particle.y = centerY
+        particle.startX = particle.x
+        particle.startY = particle.y
+        particle.sx = math.random(speed) - (speed / 2)
+        particle.sy = math.random(speed) - (speed / 2)
+        particle.age = math.random(2)
+        particle.maxAge = 20 + math.random(20)
+        particle.clr = clrs[love.math.random(1, #clrs)]
+        particle.radius = 1 + math.random(8)
+
+        table.insert(Particles, particle)
+    end
+    -- clouds
+    for i = 1, 30 do
+        local particle = {}
+        particle.isExplosion = true
+        particle.x = centerX
+        particle.y = centerY
+        particle.radius = 1 + love.math.random(4)
+        particle.age = love.math.random(2)
+        particle.maxAge = 20 + love.math.random(20)
+        particle.clr = GetParticleColorRed(particle.age)
+        particle.sx = (love.math.random() - 0.5) * 6
+        particle.sy = (love.math.random() - 0.5) * 6
+        particle.isSpark = false
+        table.insert(Particles, particle)
+    end
+
+    -- sparks
+    for i = 1, 100 do
+        local particle = {}
+        particle.isExplosion = true
+        particle.x = centerX
+        particle.y = centerY
+        particle.radius = 1 + love.math.random(4)
+        particle.age = love.math.random(2)
+        particle.maxAge = 40 + love.math.random(40)
+        particle.clr = GetParticleColorRed(particle.age)
+        particle.sx = (love.math.random() - 0.5) * 30
+        particle.sy = (love.math.random() - 0.5) * 30
+        particle.isSpark = true
+        table.insert(Particles, particle)
+    end
+    love.audio.play(Sfx["cherryBomb"])
 end
 
 function AddExplosion(centerX,centerY, isBlue)
@@ -513,6 +589,8 @@ end
 function Collide(a, b)
     local x1, y1, w1, h1
     local x2, y2, w2, h2
+
+    if a.ghost == true or b.ghost == true then return false end
     x1 = a.x + a.colX - 1
     x2 = b.x + b.colX - 1
     y1 = a.y + a.colY - 1

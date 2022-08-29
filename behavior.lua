@@ -10,14 +10,34 @@ function EnemyMission(enemy)
 
         -- Basic Easing Function
         -- x = x + (TargetX - x) / n
-        enemy.x = enemy.x + (enemy.posX - enemy.x) / 7
-        enemy.y = enemy.y + (enemy.posY - enemy.y) / 7
+        local dx = (enemy.posX - enemy.x) / 7
+        local dy = (enemy.posY - enemy.y) / 7
+
+        if enemy.boss == true then
+            local sign = 1
+            if dx < 0 then sign = -1 else sign = 1 end
+            dx = sign * math.min(1, math.abs(dx))
+            if dy < 0 then sign = -1 else sign = 1 end
+            dy = sign * math.min(1, math.abs(dy))
+        end
+        enemy.x = enemy.x + dx
+        enemy.y = enemy.y + dy
+        
         if math.abs(enemy.y - enemy.posY) < 0.7 then
             enemy.y = enemy.posY
             enemy.x = enemy.posX
             enemy.sx = 0
             enemy.sy = 0
-            enemy.mission = "PROTEC"
+            if enemy.boss == true then
+                -- ZZZ uncomment when have boss intro sound
+                -- love.audio.play(Sfx["BossIntro"])
+                enemy.mission = "BOSS1"
+                enemy.phaseBegin = T
+                enemy.wait = 30
+                enemy.shake = enemy.wait
+            else
+                enemy.mission = "PROTEC"
+            end
         end
     elseif enemy.mission == "PROTEC" then
         -- Stay Put
@@ -72,6 +92,7 @@ function EnemyMission(enemy)
             else
                 if T % 25 == 3 then FireSpread(enemy, 8, 1.5) end
             end
+        elseif enemy.enemyType == "boss" then
             
         else
             enemy.sx = 0
@@ -89,6 +110,16 @@ function EnemyMission(enemy)
             enemy.animationSpeed = enemy.animationSpeed / 3
             enemy.mission = "FLYIN"
         end
+    elseif enemy.mission == "BOSS1" then
+        Boss1(enemy)
+    elseif enemy.mission == "BOSS2" then
+        Boss2(enemy)
+    elseif enemy.mission == "BOSS3" then
+        Boss3(enemy)
+    elseif enemy.mission == "BOSS4" then
+        Boss4(enemy)
+    elseif enemy.mission == "BOSS5" then
+        Boss5(enemy)
     end
 end
 

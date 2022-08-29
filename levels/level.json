@@ -30,6 +30,11 @@
             , "animationSpeed": 0.4
             , "frames": [40, 41]
         }
+        , "boss": {
+            "hp": 125
+            , "animationSpeed": 0.1
+            , "frames": [73, 74, 75, 74]
+        }
     }
     , "waves": [
         {
@@ -141,6 +146,17 @@
                 , ["", "", "spinner", "eye", "", "", "eye", "spinner", "", ""]
                 , ["", "devil", "eye", "eye", "eye", "eye", "eye", "eye", "devil", ""]
                 , ["jelly", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "jelly"]
+            ]
+        }
+        , {
+            "name": "Wave 11"
+            , "description": "Final Boss"
+            , "attackFrequency": 10
+            , "formation": [
+                  ["", "", "", "", "boss", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
             ]
         }
     ]

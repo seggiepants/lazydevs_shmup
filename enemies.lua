@@ -28,6 +28,8 @@ function AddEnemy(prototype)
     enemy.visible = false
     
     table.insert(Enemies, enemy)
+
+    return enemy
 end
 
 function AddEnemies()
@@ -47,11 +49,12 @@ function AddEnemies()
             if enemyType ~= nil and enemyType ~= "" then
                 local startX = (1.25 * x) - ScreenW
                 local startY = y - (ScreenW / 2) - TileSize
+
                 if Wave % 2 == 0 then
                     startX = (1.25 * x) + ScreenW
                 end
                 
-                AddEnemy({
+                local newEnemy = AddEnemy({
                     x=startX
                     , y=startY
                     , posX=x
@@ -61,6 +64,14 @@ function AddEnemies()
                     , enemyType=enemyType
                     , wait=x/2
                     , mission="FLYIN"})
+                if enemyType == "boss" then
+                    newEnemy.boss = true
+                    newEnemy.sy = 0.5
+                    newEnemy.posX = (ScreenW - newEnemy.width) / 2
+                    newEnemy.posY = newEnemy.height
+                    newEnemy.x = newEnemy.posX
+                    newEnemy.y = newEnemy.height * -1
+                end
             end
             x = x + xStep
         end

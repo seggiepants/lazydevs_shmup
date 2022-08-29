@@ -87,45 +87,7 @@ function UpdateGame(dt)
         end
     end
 
-    -- Animate Shockwaves
-    for i = #Shockwaves, 1, -1 do
-        local shockwave = Shockwaves[i]
-        if shockwave.radius >= shockwave.targetRadius then
-            table.remove(Shockwaves, i)
-        else
-            shockwave.radius = shockwave.radius + shockwave.speed
-        end
-    end
-
-    -- Move particles
-    for i = #Particles, 1, -1 do
-        local particle = Particles[i]
-
-        particle.x = particle.x + particle.sx
-        particle.y = particle.y + particle.sy
-
-        if particle.isBeam and particle.age > 10 then
-            particle.isBeam = nil
-        end
-
-        if particle.isExplosion then
-            particle.sx = particle.sx * 0.9
-            particle.sy = particle.sy * 0.9
-            if particle.isBlue == nil or particle.isBlue == false then
-                particle.clr = GetParticleColorRed(particle.age) 
-            else
-                particle.clr = GetParticleColorBlue(particle.age)
-            end
-        end
-
-        particle.age = particle.age + 1
-        if particle.age >= particle.maxAge then
-            particle.radius = particle.radius - 0.5
-            if particle.radius <= 0  or particle.isExplosion == nil then
-                table.remove(Particles, i)
-            end
-        end
-    end
+    UpdateParticles(dt)
 
     -- Remove "dead" shots
     for i = #Shots, 1, -1  do
@@ -245,12 +207,20 @@ function UpdateGame(dt)
                 if Collide(enemy, Shots[j]) then
                     local shot = Shots[j]
                     shot.dead = true
+                    local halfWidth = enemy.width / 2
+                    local halfHeight = enemy.height / 2
                     AddShockwave(shot.x + halfTile, shot.y + halfTile, nil, false)
-                    AddSpark(enemy.x + halfTile, enemy.y + halfTile)
-                    local damage = shot.damage
-                    if damage == nil then damage = 1 end
-                    enemy.hp = enemy.hp - damage
-                    enemy.flash = FlashTimeoutMax
+                    AddSpark(enemy.x + halfWidth, enemy.y + halfHeight)
+                    if (enemy.mission ~= "FLYIN") then
+                        local damage = shot.damage
+                        if damage == nil then damage = 1 end
+                        enemy.hp = enemy.hp - damage
+                    end
+                    if enemy.boss == true then
+                        enemy.flash = FlashTimeoutBoss
+                    else
+                        enemy.flash = FlashTimeoutMax
+                    end
                     if enemy.hp <= 0 then
                         KillEnemy(i)
                     else
@@ -351,6 +321,48 @@ function UpdateOver(dt)
     end 
 end
 
+function UpdateParticles(dt)
+    -- Animate Shockwaves
+    for i = #Shockwaves, 1, -1 do
+        local shockwave = Shockwaves[i]
+        if shockwave.radius >= shockwave.targetRadius then
+            table.remove(Shockwaves, i)
+        else
+            shockwave.radius = shockwave.radius + shockwave.speed
+        end
+    end
+
+    -- Move particles
+    for i = #Particles, 1, -1 do
+        local particle = Particles[i]
+
+        particle.x = particle.x + particle.sx
+        particle.y = particle.y + particle.sy
+
+        if particle.isBeam and particle.age > 10 then
+            particle.isBeam = nil
+        end
+
+        if particle.isExplosion then
+            particle.sx = particle.sx * 0.9
+            particle.sy = particle.sy * 0.9
+            if particle.isBlue == nil or particle.isBlue == false then
+                particle.clr = GetParticleColorRed(particle.age) 
+            else
+                particle.clr = GetParticleColorBlue(particle.age)
+            end
+        end
+
+        particle.age = particle.age + 1
+        if particle.age >= particle.maxAge then
+            particle.radius = particle.radius - 0.5
+            if particle.radius <= 0  or particle.isExplosion == nil then
+                table.remove(Particles, i)
+            end
+        end
+    end
+end
+
 function UpdateStart(dt)
     if Btn("a") == false and Btn("b") == false then
         ButtonReady = true
@@ -369,7 +381,13 @@ function UpdateWaveText(dt)
     WaveTime = WaveTime - 1
     if WaveTime <= 0 then
         Mode = "GAME"
-        local bgm = Music["game"]
+        local bgm
+        if Wave == #LevelJson["waves"] then
+            -- zzz replace with boss music
+            bgm = Music["game"]
+        else
+            bgm = Music["game"]
+        end
         bgm:setLooping(true)
         bgm:play()
         AddEnemies()
@@ -388,6 +406,10 @@ function UpdateWin(dt)
         ButtonReady = false
         StartTitle()
     end
+
+    -- Animate the star field
+    UpdateStarfield()
+    UpdateParticles(dt)
 end
 
 function DropPickup(x, y, spr)
@@ -403,7 +425,20 @@ end
 function KillEnemy(i)
     local cherryChance = 0.1
     local enemy = Enemies[i]
+    
     if enemy == nil then return end
+    
+    if enemy.boss ~= nil then
+        enemy.mission = "BOSS5"
+        enemy.phaseBegin = T
+        enemy.ghost = true
+        enemy.sx = 0
+        enemy.sy = 0
+        EnemyShots = {} -- Clear out the enemy shots on boss death
+        -- ZZZ uncomment when we have a boss death noise
+        -- love.audio.play(Sfx["bossHit"]) -- boss died
+        return
+    end
     love.audio.play(Sfx["enemyHit"])
     local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
     AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
@@ -434,6 +469,7 @@ function StartGame()
     EnemyShots = {}
     Particles = {}
     Pickups = {}
+    Floats = {}
     Shockwaves = {}
     Shots = {}
     Stars = {}
@@ -500,7 +536,8 @@ function StartWin()
     ButtonReady = false
     Mode = "WIN"
     Lockout = T + 30
-    love.audio.stop()
+    love.audio.stop(Music["game"])
+    --love.audio.stop()
     local bgm = Music["win"]
     bgm:setLooping(false)
     bgm:play()

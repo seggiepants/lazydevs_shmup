@@ -31,12 +31,24 @@ function DrawGame()
 
     -- Draw Enemies
     for key, enemy in pairs(Enemies) do
+        local shaderOn = false
         if enemy.flash > 0 then
-            RecolorShader:send("Target", unpack(PalWhite)) 
-            love.graphics.setShader(RecolorShader)
+            if enemy.boss == true then
+                enemy.sprite = 72
+                if T % 8 < 4 then
+                    RecolorShader:send("Target", unpack(PalBoss))
+                    shaderOn = true
+                end
+            else
+                RecolorShader:send("Target", unpack(PalWhite))
+                shaderOn = true 
+            end
+            if shaderOn == true then
+                love.graphics.setShader(RecolorShader)
+            end
         end
         DrawSprite(enemy)
-        if enemy.flash > 0 then
+        if shaderOn then
             love.graphics.setShader()
         end
     end        
@@ -184,7 +196,14 @@ function DrawSprite(sprite)
             x = x + 1
         end
     end
+    --[[ local ghostMode = (sprite.ghost == true)
+    if ghostMode then
+        love.graphics.setShader(TransparentShader)
+    end ]]
     Spr(math.floor(sprite.sprite), x, y)
+    --[[ if ghostMode then
+        love.graphics.setShader()
+    end ]]
 end
 
 function DrawStarfield()

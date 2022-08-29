@@ -48,8 +48,14 @@ function Fire(enemy, ang, speed)
     if shot.colHeight == nil then shot.colHeight = 2 end
     table.insert(EnemyShots, shot)
 
-    enemy.flash = 8
-    love.audio.play(Sfx["enemyShot"])
+    if enemy.boss == true then
+        shot.y = shot.y + (enemy.height / 2) - (shot.height / 2)
+        love.audio.play(Sfx["bossShoot"])
+    
+    else
+        enemy.flash = 8
+        love.audio.play(Sfx["enemyShot"])
+    end
     return shot
 end
 
@@ -96,7 +102,7 @@ function FireSpread(enemy, numShots, speed)
         enemy.shotOffset = enemy.shotOffset - (math.pi * 2.0)
     end
     enemy.flash = 8
-    love.audio.play(Sfx["enemyShot"])
+    --love.audio.play(Sfx["enemyShot"])
 end
 
 function PrepareShot(enemy)
