@@ -383,8 +383,7 @@ function UpdateWaveText(dt)
         Mode = "GAME"
         local bgm
         if Wave == #LevelJson["waves"] then
-            -- zzz replace with boss music
-            bgm = Music["game"]
+            bgm = Music["bossMusic"]
         else
             bgm = Music["game"]
         end
@@ -435,8 +434,7 @@ function KillEnemy(i)
         enemy.sx = 0
         enemy.sy = 0
         EnemyShots = {} -- Clear out the enemy shots on boss death
-        -- ZZZ uncomment when we have a boss death noise
-        -- love.audio.play(Sfx["bossHit"]) -- boss died
+        love.audio.play(Sfx["bossDeath"]) -- boss died
         return
     end
     love.audio.play(Sfx["enemyHit"])

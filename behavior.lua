@@ -29,8 +29,7 @@ function EnemyMission(enemy)
             enemy.sx = 0
             enemy.sy = 0
             if enemy.boss == true then
-                -- ZZZ uncomment when have boss intro sound
-                -- love.audio.play(Sfx["BossIntro"])
+                love.audio.play(Sfx["bossIntro"])
                 enemy.mission = "BOSS1"
                 enemy.phaseBegin = T
                 enemy.wait = 30

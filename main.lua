@@ -142,6 +142,8 @@ function love.load()
         Sfx["bombFail"] = love.audio.newSource("audio/bombFail.wav", "static")
         Sfx["cherryBomb"] = love.audio.newSource("audio/cherryBomb.wav", "static")
         Sfx["bossShoot"] = love.audio.newSource("audio/bossShoot.wav", "static")
+        Sfx["bossIntro"] = love.audio.newSource("audio/bossIntro.wav", "static")
+        Sfx["bossDeath"] = love.audio.newSource("audio/bossDeath.wav", "static")
 
         Music = {}
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
@@ -150,6 +152,8 @@ function love.load()
         Music["nextwave"] = love.audio.newSource("audio/nextwave.xm", "stream")
         Music["over"] = love.audio.newSource("audio/lose.xm", "stream")
         Music["win"] = love.audio.newSource("audio/win.xm", "stream")
+        Music["bossMusic"] = love.audio.newSource("audio/bossMusic.xm", "stream")
+        
         Ship = {}
         ShipPrototype = {
             frames = {1, 2, 3}
