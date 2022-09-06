@@ -186,13 +186,15 @@ function PickTimer()
 
     if T > NextFire then
         PickFire()
-        NextFire = T + 20 + math.random(20)
+        NextFire = T + 20 + math.random(FireFrequency)
     end
 
     --return enemy
 end
 
 function PickupLogic(pickup)
+    local heartSpr = 9
+
     if pickup.sprite == CherrySpr then
         love.audio.play(Sfx["pickup"])
         Cherries = Cherries + 1
@@ -203,10 +205,21 @@ function PickupLogic(pickup)
             AddFloat("1UP!", pickup.x + pickup.width / 2, pickup.y + pickup.height / 2)
         elseif Cherries >= 10 then
             -- Bombs
-            Score = Score + Cherries
+            Score = Score + 5000
+            AddFloat(5000, pickup.x + pickup.width / 2, pickup.y + pickup.height / 2)
             Cherries = 0
+            love.audio.play(Sfx["bombFail"])
         end
-        Score = Score + 1
+        Score = Score + 100
+    elseif pickup.sprite == heartSpr then
+        if Lives < 4 then
+            Lives = Lives + 1
+            love.audio.play(Sfx["lifeUp"])
+            AddFloat("1UP!", pickup.x + pickup.width / 2, pickup.y + pickup.height / 2)
+        else
+            love.audio.play(Sfx["bombFail"])
+            Score = Score + 50
+        end
     else
         for i, shotType in pairs(ShotTypes) do
             if shotType.sprite == pickup.sprite then

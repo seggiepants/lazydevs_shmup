@@ -29,6 +29,7 @@ function CherryBomb()
     Muzzle = 5
     Ship.invulnerable = 30
     ShowSkull = 1
+    ScreenFlash = 4
 end
 
 function Fire(enemy, ang, speed)

@@ -1,46 +1,53 @@
 {
     "prototypes": {
         "eye": {
-            "hp": 3
+            "hp": 2
             , "animationSpeed": 0.4
             , "frames": [13, 14, 15, 16]
+            , "points": 100
         }
         , "jelly": {
             "hp": 2
             , "animationSpeed": 0.2
             , "frames": [26, 27, 28, 29]
+            , "points": 125
         }
         , "devil": {
             "hp": 2
             , "animationSpeed": 0.3
             , "frames": [30, 31]
+            , "points": 150
         }
         , "spinner": {
             "hp": 4
-            , "animationSpeed": 0.3
+            , "animationSpeed": 0.25
             , "frames": [17, 18, 19, 20]
+            , "points": 175
         }
         , "butterfly": {
             "hp": 3
             , "animationSpeed": 0.2
             , "frames": [32, 33, 34, 33]
+            , "points": 125
         }
         , "chungus": {
             "hp": 25
             , "animationSpeed": 0.4
             , "frames": [40, 41]
+            , "points": 300
         }
         , "boss": {
             "hp": 125
             , "animationSpeed": 0.1
             , "frames": [73, 74, 75, 74]
+            , "points": 10000
         }
     }
     , "waves": [
         {
-            "name": "Wave 1"
-            , "description": "Space Invaders"
-            , "attackFrequency": 60
+            "name": "Space Invaders"
+            , "attackFrequency": 100
+            , "fireFrequency": 40
             , "formation": [
                   ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
                 , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
@@ -49,9 +56,9 @@
             ]
         }
         , {
-            "name": "Wave 2"
-            , "description": "Delta Formation"
-            , "attackFrequency": 60
+            "name": "Delta Formation"
+            , "attackFrequency": 100
+            , "fireFrequency": 40
             , "formation": [
                   ["spinner", "jelly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "jelly", "spinner"]
                 , ["", "spinner", "jelly", "", "", "", "", "jelly", "spinner", ""]
@@ -60,9 +67,9 @@
             ]
         }
         , {
-            "name": "Wave 3"
-            , "description": "Dive Bomb"
-            , "attackFrequency": 60
+            "name": "Dive Bomb"
+            , "attackFrequency": 90
+            , "fireFrequency": 40
             , "formation": [
                 ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
               , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
@@ -71,9 +78,9 @@
           ]
         }
         , {
-            "name": "Wave 4"
-            , "description": "Zeta Formation"
-            , "attackFrequency": 60
+            "name": "Zeta Formation"
+            , "attackFrequency": 80
+            , "fireFrequency": 40
             , "formation": [
                   ["butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly"]
                 , ["", "", "", "", "", "", "", "spinner", "devil", ""]
@@ -83,9 +90,9 @@
             ]
         }
         , {
-            "name": "Wave 5"
-            , "description": "Sneak Attack"
-            , "attackFrequency": 60
+            "name": "Sneak Attack"
+            , "attackFrequency": 80
+            , "fireFrequency": 30
             , "formation": [
                   ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
                 , ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
@@ -94,9 +101,9 @@
             ]
         }
         , {
-            "name": "Wave 6"
-            , "description": "Ordered Formation"
-            , "attackFrequency": 60
+            "name": "Ordered Formation"
+            , "attackFrequency": 80
+            , "fireFrequency": 30
             , "formation": [
                   ["butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly"]
                 , ["devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil"]
@@ -105,9 +112,9 @@
             ]
         }
         , {
-            "name": "Wave 7"
-            , "description": "Dive Bomb II"
+            "name": "Dive Bomb II"
             , "attackFrequency": 60
+            , "fireFrequency": 20
             , "formation": [
                   ["", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", ""]
                 , ["devil", "butterfly", "jelly", "", "eye", "", "eye", "jelly", "butterfly", "devil"]
@@ -116,9 +123,9 @@
             ]
         }
         , {
-            "name": "Wave 8"
-            , "description": "Fortified Shooter"
+            "name": "Fortified Shooter"
             , "attackFrequency": 60
+            , "fireFrequency": 20
             , "formation": [
                   ["", "devil", "", "devil", "", "devil", "", "devil", "", "devil"]
                 , ["devil", "", "devil", "", "devil", "", "devil", "", "devil", ""]
@@ -127,9 +134,9 @@
             ]
         }
         , {
-            "name": "Wave 9"
-            , "description": "The Big One"
-            , "attackFrequency": 60
+            "name": "The Big One"
+            , "attackFrequency": 40
+            , "fireFrequency": 20
             , "formation": [
                   ["", "", "", "", "chungus", "", "", "", "", ""]
                 , ["", "", "", "", "", "", "", "", "", ""]
@@ -138,9 +145,9 @@
             ]
         }
         , {
-            "name": "Wave 10"
-            , "description": "Full Assault"
-            , "attackFrequency": 10
+            "name": "Full Assault"
+            , "attackFrequency": 40
+            , "fireFrequency": 20
             , "formation": [
                   ["", "", "", "butterfly", "chungus", "", "butterfly", "", "", ""]
                 , ["", "", "spinner", "eye", "", "", "eye", "spinner", "", ""]
@@ -149,9 +156,9 @@
             ]
         }
         , {
-            "name": "Wave 11"
-            , "description": "Final Boss"
+            "name": "The Eye of Doom"
             , "attackFrequency": 10
+            , "fireFrequency": 10
             , "formation": [
                   ["", "", "", "", "boss", "", "", "", "", ""]
                 , ["", "", "", "", "", "", "", "", "", ""]

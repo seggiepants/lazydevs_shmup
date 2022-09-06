@@ -99,5 +99,14 @@ function NextWave()
         Time = 0
         EnemyShots = {} -- clear out old enemy fire
         Shots = {} -- clear out player enemy fire
+        AttackFrequency = LevelJson["waves"][Wave]["attackFrequency"]
+        FireFrequency = LevelJson["waves"][Wave]["fireFrequency"]
+        if AttackFrequency == nil then
+            AttackFrequency = 60
+        end
+        if FireFrequency == nil then
+            FireFrequency = 20
+        end
+        NextFire = T + 20 + math.random(FireFrequency)
     end
 end

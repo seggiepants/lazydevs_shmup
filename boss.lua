@@ -180,6 +180,7 @@ function Boss5(enemy)
     -- Movement
     enemy.shake = 10
     enemy.flash = 10
+    ScreenFlash = 4
     
     if T % 8 == 0 then
         local centerX = enemy.x + math.random(enemy.width)
@@ -189,8 +190,8 @@ function Boss5(enemy)
         Shake = 2
     end
 
-    if enemy.phaseBegin + (2 * 60) < T then
-        if T % 5 == 0 then
+    if enemy.phaseBegin + (3 * 60) < T then
+        if T % 4 == 2 then
             local centerX = enemy.x + math.random(enemy.width)
             local centerY = enemy.y + math.random(enemy.height)
             AddExplosion(centerX, centerY, false)
@@ -203,12 +204,18 @@ function Boss5(enemy)
     -- N/A
 
     -- Phase Transition
-    local ticks = (4 * 60) -- 4 seconds @ 60 fps
+    local ticks = (6 * 60) -- 4 seconds @ 60 fps
     if enemy.phaseBegin + ticks < T then
         Shake = 15
         Enemies = {}
         local centerX = enemy.x + (enemy.width / 2)
         local centerY = enemy.y + (enemy.height / 2)
         AddBigExplosion(centerX, centerY)
+        local points = enemy.points
+        if points == nil then
+            points = 1000
+        end
+        Score = Score + enemy.points
+        AddFloat(enemy.points, centerX, enemy.y)
     end  
 end

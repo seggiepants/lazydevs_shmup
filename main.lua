@@ -11,15 +11,16 @@ require "boss"
 
 -- To Do:
 -- --------------------
--- Scoring
 -- Nicer Screens
 
 -- DoggieZone
 -- 1. Playtest the game, find bugs, balance problems. 
--- 
+--    a. Don't think fire frequency is working right seem to have dive or fire but not both normally.
+--    b. Want mouse support for Android Love version.
+
 -- Other
 -- --------------------
--- Need Boss Music, and SFX: Boss Explosion, Boss Death sound, Boss Intro sound (on flyin)
+-- Stopped at 0:15
 
 -- _INIT() in Pico-8
 function love.load()
@@ -29,6 +30,7 @@ function love.load()
     ScreenScale = 4
     TileSize = 8
     FPS = 60
+    Version = "v1.0"
 
     local success = love.window.setMode(ScreenW * ScreenScale, ScreenH * ScreenScale, {resizable=false})
     if (success) then
@@ -160,6 +162,7 @@ function love.load()
         }
         Ship.sprite = 2
         AttackFrequency = 60
+        FireFrequency = 20
         NextFire = 0
         FlameSpr = 4
         Lives = 3
@@ -205,12 +208,18 @@ function love.load()
         T = 0
         Wave = 0
         Shake = 0
+        ScreenFlash = 0
         Cherries = 0
+        WebMode = false
+        HighScore = 0
+        PeekerX = ScreenW / 2
+
         -- Debug = "chicken"
         Keys = {}
         KeysPrev = {}
         CurrentJoystick = 0
         Joysticks = {}
+        LoadHighScore()
         StartTitle()
     end
 end
@@ -264,7 +273,8 @@ function love.keypressed(key)
 end
 
 function love.quit()
-    print("Goodbye")
+    --print("Goodbye")
+    SaveHighScore()
 end
 
 --- _UPDATE in PICO-8, Hard 30 FPS
@@ -824,5 +834,26 @@ function ScreenShake()
     end
     if Shake < 0 then
         Shake = 0
+    end
+end
+
+function LoadHighScore()
+    if WebMode == false then
+        local info = love.filesystem.getInfo("score.txt","file")
+        if info ~= nil then
+            local contents, size = love.filesystem.read("string", "score.txt", info.size)
+            if size > 0 then
+                HighScore = tonumber(contents)
+            end
+        end
+    else
+        HighScore = 0
+    end
+end
+
+function SaveHighScore()
+    if WebMode == false then
+        local data = tostring(HighScore)
+        love.filesystem.write("score.txt", data, #data)
     end
 end

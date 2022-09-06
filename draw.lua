@@ -1,5 +1,10 @@
 function DrawGame()
-    love.graphics.clear(Pal[1])
+    if ScreenFlash > 0 then
+        ScreenFlash = ScreenFlash - 1
+        love.graphics.clear(Pal[3])
+    else
+        love.graphics.clear(Pal[1])
+    end
     DrawStarfield()
 
     -- Draw Shockwaves
@@ -237,49 +242,77 @@ function DrawOver()
     Spr(58, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
     CenterPrint("GAME OVER", 40, 9)
+    CenterPrint("Score: " .. Score, 56, 13)
+    if Score > HighScore then
+        local clr = 8
+        if T % 8 < 4 then
+            clr = 10
+        end
+        CenterPrint("New High Score!", 64, clr)
+    end
     CenterPrint("Press any key to continue", 80, Blink())
 end
 
 function DrawStart()
-    love.graphics.clear(Pal[2])
-    local x = ScreenW / 2
-    local y = ScreenH / 2
-    love.graphics.setColor(Pal[1])
-    MaxRadius = math.sqrt((ScreenW/2)^2 + (ScreenH/2)^2)
-    for radius = 10, MaxRadius, 10 do
-        love.graphics.circle("line", x, y, radius - (T % 10))
-    end
-    local radius = math.max(ScreenW / 2, ScreenH / 2)
-    local offset = (love.timer.getTime() * 25) % 360
-    for angle = 0, 360, 15 do
-        Line(x, y, x + (MaxRadius * math.cos(math.rad(angle + offset))), y + (MaxRadius * math.sin(math.rad(angle + offset))), 1)
-    end
-    
-    Spr(56, 10, 10)
-    Spr(57, ScreenW - TileSize - 10, 10)
-    Spr(56, 10, ScreenH - TileSize - 10)
-    Spr(57, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
-    --[[
-    if (T % 8 < 4) then
-        Spr(30, 48, 56) -- Red Bat
-        Spr(40, 56, 56) -- Big Guy
-    else
-        Spr(31, 48, 56) -- Red Bat
-        Spr(41, 56, 56) -- Big Guy
-    end
-    -- Spinner
-    Spr(25 + math.floor((T % 16)/4), 72, 56)
-    ]]--
+    local titleSpr = 78
+    local peekerSpr = 13
 
-    CenterPrint("My Awesome Shmup", 40, 13)
+    love.graphics.clear(Pal[1])
+    DrawStarfield()
+    
+    local x, y, w, h = Quads[titleSpr]:getViewport()
+    x = (ScreenW - w) / 2
+    y = TileSize * 3
+    local delta = math.sin(love.timer.getTime() * 4)
+    Spr(peekerSpr, PeekerX, y + delta * (TileSize / 2))
+    if delta > 0.75 then
+        PeekerX = x + (TileSize * 2) + math.random(w - (TileSize * 3))
+    end
+    Spr(titleSpr, x, y)
+    love.graphics.setColor(Pal[4])
+    love.graphics.print("My", x + TileSize / 2, y - TileSize)
+    --CenterPrint("My Awesome Shmup", 40, 13)
+
+    if HighScore > 0 then
+        CenterPrint("High Score: ", 56, 13)
+        CenterPrint(HighScore, 64, 13)
+    end
     CenterPrint("Press any key to start", 80, Blink())
+
+    x = TileSize
+    y = 90
+    love.graphics.setColor(Pal[2][1], Pal[2][2], Pal[2][3], 0.5)
+    love.graphics.rectangle("fill",x, y, ScreenW - (x * 2), ScreenH - y - TileSize)
+    
+    love.graphics.setColor(Pal[14])
+    
+    local message = "Z or Space to Shoot"
+    love.graphics.print(message, x, y)
+    y = y + Font8:getHeight(message) + 1
+
+    local message = "X or Tab for Bomb"
+    love.graphics.print(message, x, y)
+    y = y + Font8:getHeight(message) + 1
+
+    local message = "Escape to Exit"
+    love.graphics.print(message, x, y)
+    y = y + Font8:getHeight(message) + 1
+    
+    
+    love.graphics.setColor(Pal[2])
+    x = ScreenW - Font8:getWidth(Version)
+    y = ScreenH - Font8:getHeight(Version) 
+    love.graphics.print(Version, x, y)
 end
 
 function DrawWaveText()
     DrawGame()
-    --CenterPrint("Wave " .. Wave, 60, Blink())
-    local name = LevelJson["waves"][Wave]["name"]
-    local description = LevelJson["waves"][Wave]["description"]
+    --CenterPrint("Wave " .. Wave, 60, Blink())    
+    local name = "Wave " .. Wave .. " of " .. #LevelJson["waves"]
+    if Wave == #LevelJson["waves"] then
+        name = "Final Wave!"
+    end
+    local description = LevelJson["waves"][Wave]["name"]
     local textHeight = 8
     local y = math.floor((ScreenH - textHeight) / 2)
     if description ~= nil then y =  math.floor((ScreenH - (textHeight * 3)) / 2) end
@@ -297,8 +330,16 @@ function DrawWin()
     Spr(56, 10, ScreenH - TileSize - 10)
     Spr(57, ScreenW - TileSize - 10, ScreenH - TileSize - 10)
     
-    CenterPrint("CONGRATULATIONS!", 40, 13)
-    CenterPrint("YOU WIN", 56, 13)
+    CenterPrint("CONGRATULATIONS!", 32, 13)
+    CenterPrint("YOU WIN", 40, 13)
+    CenterPrint("Score: " .. Score, 56, 13)
+    if Score > HighScore then
+        local clr = 8
+        if T % 8 < 4 then
+            clr = 10
+        end
+        CenterPrint("New High Score!", 64, clr)
+    end
     CenterPrint("Press any key to continue", 80, Blink())
 end
 

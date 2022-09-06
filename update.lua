@@ -110,17 +110,8 @@ function UpdateGame(dt)
         end
     end
 
-    -- Update/Remove "dead" floats
-    for i = #Floats, 1, -1 do
-        if Floats[i].age > 60 then
-            table.remove(Floats, i)
-        else
-            local float = Floats[i]
-            float.y = float.y - 0.5
-            float.age = float.age + 1
-        end
-    end
-
+    UpdateFloats(dt)
+    
     -- Move the bullet
     for i, shot in pairs(Shots)  do
         if shot.ShotType == 4 then -- wave
@@ -198,8 +189,27 @@ function UpdateGame(dt)
         end
     end
 
-    -- Collision Enemies x Shots
+    -- Collision Cherry Bomb Shots x Enemy Shots
     local halfTile = (TileSize / 2)
+    local cherryBombShotSpr = 12
+    for i, shot in ipairs(Shots) do
+        if shot.sprite == cherryBombShotSpr and shot.dead ~= true then
+            for j, enemyShot in ipairs(EnemyShots) do
+                if enemyShot.dead ~= true then
+                    if Collide(enemyShot, shot) then
+                        enemyShot.dead = true
+                        Score = Score + 500
+                        local halfWidth = enemyShot.width / 2
+                        local halfHeight = enemyShot.height / 2
+                        AddShockwave(enemyShot.x + halfWidth, enemyShot.y + halfHeight, 9, false)
+                        love.audio.play(Sfx["enemyShieldHit"])
+                    end
+                end
+            end
+        end
+    end
+
+    -- Collision Enemies x Shots
     for i = #Enemies, 1, -1 do
         local enemy = Enemies[i]
         for j, shot in pairs(Shots) do
@@ -241,8 +251,14 @@ function UpdateGame(dt)
                 Shake = 12
                 Ship.invulnerable = InvulnerableMax
                 love.audio.play(Sfx["hurt"])
-                table.remove(Enemies, i)
-                AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2), true)
+                if Enemies[i].enemyType ~= "boss" then
+                    -- Can't crash into the boss to kill it, that is cheap.
+                    table.remove(Enemies, i)
+                    AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2), true)
+                end
+                Ship.x = (ScreenW - TileSize) / 2 -- Are we sure?
+                Ship.y = (ScreenH - (TileSize * 2))
+                ScreenFlash = 4
                 if Lives <= 0 and Ship.dead == false then
                     Ship.dead = true
                     Ship.deadTime = 0
@@ -261,6 +277,9 @@ function UpdateGame(dt)
                 love.audio.play(Sfx["hurt"])
                 table.remove(EnemyShots, i)
                 AddExplosion(Ship.x + (TileSize / 2), Ship.y + (TileSize / 2), true)
+                Ship.x = (ScreenW - TileSize) / 2 -- Are we sure
+                Ship.y = (ScreenH - (TileSize * 2))
+                ScreenFlash = 4
                 if Lives <= 0 and Ship.dead == false then
                     Ship.dead = true
                     Ship.deadTime = 0
@@ -283,7 +302,7 @@ function UpdateGame(dt)
     end
 
     -- Animate the star field
-    UpdateStarfield()
+    UpdateStarfield(dt, 1)
 
     if Lives <= 0 and Ship.deadTime >= Ship.maxDeadTime then
         StartGameOver()
@@ -297,9 +316,12 @@ function UpdateGetReady(dt)
     end
 end
 
-function UpdateStarfield()
+function UpdateStarfield(dt, speed)
+    if speed == nil then
+        speed = 1
+    end
     for key, star in ipairs(Stars) do
-        star.y = star.y + star.spd
+        star.y = star.y + (star.spd * speed)
         if star.y >= ScreenH then
             star.x = love.math.random(ScreenW)
             star.y = star.y - ScreenH - TileSize
@@ -317,8 +339,28 @@ function UpdateOver(dt)
     end
     if ButtonReady and (Btn("a") or Btn("b")) then
         ButtonReady = false
+        if Score > HighScore then
+            HighScore = Score
+        end    
         StartTitle()
+    else
+        UpdateStarfield(dt, 1)
+        UpdateFloats(dt)
+        UpdateParticles(dt)
     end 
+end
+
+function UpdateFloats(dt)
+    -- Update/Remove "dead" floats
+    for i = #Floats, 1, -1 do
+        if Floats[i].age > 60 then
+            table.remove(Floats, i)
+        else
+            local float = Floats[i]
+            float.y = float.y - 0.5
+            float.age = float.age + 1
+        end
+    end
 end
 
 function UpdateParticles(dt)
@@ -374,6 +416,8 @@ function UpdateStart(dt)
     elseif ButtonReady and Btn("b") then
         love.event.quit()
     end 
+
+    UpdateStarfield(dt, 0.5)
 end
 
 function UpdateWaveText(dt)
@@ -390,6 +434,10 @@ function UpdateWaveText(dt)
         bgm:setLooping(true)
         bgm:play()
         AddEnemies()
+    else
+        UpdateStarfield(dt, 2)
+        UpdateFloats(dt)
+        UpdateParticles(dt)
     end
 end
 
@@ -403,11 +451,15 @@ function UpdateWin(dt)
     end
     if ButtonReady and (Btn("a") or Btn("b")) then
         ButtonReady = false
+        if Score > HighScore then
+            HighScore = Score
+        end    
         StartTitle()
     end
 
     -- Animate the star field
-    UpdateStarfield()
+    UpdateStarfield(dt, 1)
+    UpdateFloats(dt)
     UpdateParticles(dt)
 end
 
@@ -419,6 +471,18 @@ function DropPickup(x, y, spr)
         , sprite = spr
         , sy = 0.75})
     table.insert(Pickups, pickup)
+end
+
+function InitStars()
+    Stars = {}
+    local starClr = {6, 7, 8, 16}
+    for i=1,100 do
+        local star = {} 
+        star.x = love.math.random(ScreenW)
+        star.y = love.math.random(ScreenH)
+        star.spd = (love.math.random() * 1.5) + .05
+        table.insert(Stars, star)
+    end
 end
 
 function KillEnemy(i)
@@ -434,21 +498,26 @@ function KillEnemy(i)
         enemy.sx = 0
         enemy.sy = 0
         EnemyShots = {} -- Clear out the enemy shots on boss death
+        love.audio.stop()
         love.audio.play(Sfx["bossDeath"]) -- boss died
         return
+    end
+    local points = enemy.points
+    if points == nil then
+        points = 100
     end
     love.audio.play(Sfx["enemyHit"])
     local x, y, w, h = Quads[math.floor(enemy.sprite)]:getViewport()
     AddExplosion(enemy.x + (w / 2), enemy.y + (h / 2), false)
-    Score = Score + 1
+    Score = Score + points
 
     if enemy.mission == "ATTAC" then
         if math.random() < 0.5 then
             PickAttacker()
         end
         CherryChance = 0.2
-        AddFloat("10", enemy.x + (enemy.width / 2), enemy.y + (enemy.height / 2))
-        Score = Score + 10
+        AddFloat(points * 2, enemy.x + (enemy.width / 2), enemy.y + (enemy.height / 2))
+        Score = Score + points
     end
 
     if math.random() < cherryChance then
@@ -456,6 +525,9 @@ function KillEnemy(i)
     elseif math.random() < 0.05 then
         local shotType = math.random(#ShotTypes)
         DropPickup(enemy.x, enemy.y, ShotTypes[shotType].sprite)
+    elseif math.random() < 0.025 then
+        local heartSpr = 9
+        DropPickup(enemy.x, enemy.y, heartSpr)
     end
 
     table.remove(Enemies, i)
@@ -470,10 +542,9 @@ function StartGame()
     Floats = {}
     Shockwaves = {}
     Shots = {}
-    Stars = {}
 
     Cherries = 0
-    Wave = 0
+    Wave = 0 -- Fix me
     NextWave()
     Ship = MakeSprite(ShipPrototype)
     Ship.x = (ScreenW - TileSize) / 2
@@ -492,14 +563,7 @@ function StartGame()
     Lives = 4
     PowerupTimeout = 0
     ShowSkull = 0
-    local starClr = {6, 7, 8, 16}
-    for i=1,100 do
-        local star = {} 
-        star.x = love.math.random(ScreenW)
-        star.y = love.math.random(ScreenH)
-        star.spd = (love.math.random() * 1.5) + .05
-        table.insert(Stars, star)
-    end
+    InitStars()
     ShootOK = true
     ShotType = 1
     ButtonReady = false    
@@ -528,6 +592,7 @@ function StartTitle()
     local bgm = Music["start"]
     bgm:setLooping(false)
     bgm:play()
+    InitStars()
 end
 
 function StartWin()
