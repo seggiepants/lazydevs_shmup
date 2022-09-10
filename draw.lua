@@ -281,28 +281,55 @@ function DrawStart()
 
     x = TileSize
     y = 90
+    if MouseMode == false and WebMode == true then y = y + 10 end
+
     love.graphics.setColor(Pal[2][1], Pal[2][2], Pal[2][3], 0.5)
     love.graphics.rectangle("fill",x, y, ScreenW - (x * 2), ScreenH - y - TileSize)
     
     love.graphics.setColor(Pal[14])
-    
-    local message = "Z or Space to Shoot"
-    love.graphics.print(message, x, y)
-    y = y + Font8:getHeight(message) + 1
+    local os = love.system.getOS()
+    local isPhone = (os == "Android" or os == "iOS")
 
-    local message = "X or Tab for Bomb"
-    love.graphics.print(message, x, y)
-    y = y + Font8:getHeight(message) + 1
+    if MouseMode then
+        local message = "Ship follows Mouse"
+        if isPhone then message = "Ship follows Touch" end
+        love.graphics.print(message, x, y)
+        y = y + Font8:getHeight(message) + 1
 
-    local message = "Escape to Exit"
-    love.graphics.print(message, x, y)
-    y = y + Font8:getHeight(message) + 1
-    
-    
-    love.graphics.setColor(Pal[2])
-    x = ScreenW - Font8:getWidth(Version)
-    y = ScreenH - Font8:getHeight(Version) 
-    love.graphics.print(Version, x, y)
+        local message = "Click/Touch to Shoot"
+        love.graphics.print(message, x, y)
+        y = y + Font8:getHeight(message) + 1
+
+        local message = "Double Click to Bomb"
+        love.graphics.print(message, x, y)
+        y = y + Font8:getHeight(message) + 1
+        
+        
+        love.graphics.setColor(Pal[2])
+        x = ScreenW - Font8:getWidth(Version)
+        y = ScreenH - Font8:getHeight(Version) 
+        love.graphics.print(Version, x, y)
+    else
+        local message = "Z or Space to Shoot"
+        love.graphics.print(message, x, y)
+        y = y + Font8:getHeight(message) + 1
+
+        local message = "X or Tab for Bomb"
+        love.graphics.print(message, x, y)
+        y = y + Font8:getHeight(message) + 1
+
+        if WebMode == false then
+            local message = "Escape to Exit"
+            love.graphics.print(message, x, y)
+            y = y + Font8:getHeight(message) + 1
+        end
+        
+        
+        love.graphics.setColor(Pal[2])
+        x = ScreenW - Font8:getWidth(Version)
+        y = ScreenH - Font8:getHeight(Version) 
+        love.graphics.print(Version, x, y)
+    end
 end
 
 function DrawWaveText()

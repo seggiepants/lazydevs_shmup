@@ -84,15 +84,17 @@ function NextWave()
     if Wave > #LevelJson["waves"] then
         StartWin()
     else
-        love.audio.stop()
-        local bgm
-        if Wave > 1 then
-            bgm = Music["nextwave"]
-        else
-            bgm = Music["firstlevel"]
+        if WebMode == false then
+            love.audio.stop()
+            local bgm
+            if Wave > 1 then
+                bgm = Music["nextwave"]
+            else
+                bgm = Music["firstlevel"]
+            end
+            bgm:setLooping(false)
+            bgm:play()
         end
-        bgm:setLooping(false)
-        bgm:play()
         WaveTime = 75
         Mode = "WAVETEXT"
         PreviousTime = -1

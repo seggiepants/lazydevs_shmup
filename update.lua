@@ -413,7 +413,7 @@ function UpdateStart(dt)
     if ButtonReady and Btn("a") then
         ButtonReady = false
         StartGame() -- was get ready
-    elseif ButtonReady and Btn("b") then
+    elseif ButtonReady and Btn("b") and WebMode == false then
         love.event.quit()
     end 
 
@@ -425,14 +425,16 @@ function UpdateWaveText(dt)
     WaveTime = WaveTime - 1
     if WaveTime <= 0 then
         Mode = "GAME"
-        local bgm
-        if Wave == #LevelJson["waves"] then
-            bgm = Music["bossMusic"]
-        else
-            bgm = Music["game"]
+        if WebMode == false then
+            local bgm
+            if Wave == #LevelJson["waves"] then
+                bgm = Music["bossMusic"]
+            else
+                bgm = Music["game"]
+            end
+            bgm:setLooping(true)
+            bgm:play()
         end
-        bgm:setLooping(true)
-        bgm:play()
         AddEnemies()
     else
         UpdateStarfield(dt, 2)
@@ -573,10 +575,12 @@ function StartGameOver()
     ButtonReady = false
     Mode = "OVER"
     Lockout = T + 30
-    love.audio.stop()
-    local bgm = Music["over"]
-    bgm:setLooping(false)
-    bgm:play()
+    if WebMode == false then
+        love.audio.stop()    
+        local bgm = Music["over"]
+        bgm:setLooping(false)
+        bgm:play()
+    end
 end
 
 function StartGetReady()
@@ -588,10 +592,12 @@ end
 function StartTitle()
     ButtonReady = false
     Mode = "START"
-    love.audio.stop()
-    local bgm = Music["start"]
-    bgm:setLooping(false)
-    bgm:play()
+    if WebMode == false then
+        love.audio.stop()
+        local bgm = Music["start"]
+        bgm:setLooping(false)
+        bgm:play()
+    end
     InitStars()
 end
 
@@ -599,9 +605,11 @@ function StartWin()
     ButtonReady = false
     Mode = "WIN"
     Lockout = T + 30
-    love.audio.stop(Music["game"])
-    --love.audio.stop()
-    local bgm = Music["win"]
-    bgm:setLooping(false)
-    bgm:play()
+    if WebMode == false then
+        love.audio.stop(Music["game"])
+        --love.audio.stop()
+        local bgm = Music["win"]
+        bgm:setLooping(false)
+        bgm:play()
+    end
 end

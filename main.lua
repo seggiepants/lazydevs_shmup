@@ -9,145 +9,134 @@ require "behavior"
 require "bullets"
 require "boss"
 
--- To Do:
--- --------------------
--- Nicer Screens
-
--- DoggieZone
--- 1. Playtest the game, find bugs, balance problems. 
---    a. Don't think fire frequency is working right seem to have dive or fire but not both normally.
---    b. Want mouse support for Android Love version.
-
--- Other
--- --------------------
--- Stopped at 0:15
-
 -- _INIT() in Pico-8
 function love.load()
 
-    ScreenW = 128
-    ScreenH = 128
-    ScreenScale = 4
     TileSize = 8
     FPS = 60
-    Version = "v1.0"
+    Version = "v1.1"
 
-    local success = love.window.setMode(ScreenW * ScreenScale, ScreenH * ScreenScale, {resizable=false})
-    if (success) then
-        love.graphics.setDefaultFilter("nearest", "nearest", 1)
+    love.graphics.setDefaultFilter("nearest", "nearest", 1)
 
-        Font8 = love.graphics.newFont("font/Bitstream Vera Sans Mono Roman.ttf", 8, "mono", 1)
-        love.graphics.setFont(Font8)
+    Font8 = love.graphics.newFont("font/Bitstream Vera Sans Mono Roman.ttf", 8, "mono", 1)
+    love.graphics.setFont(Font8)
 
-        -- pico-8 graphics page
-        Img = love.graphics.newImage("img/graphics.png", nil)
+    -- pico-8 graphics page
+    Img = love.graphics.newImage("img/graphics.png", nil)
 
-        White = {1, 1, 1, 1}
-        -- pio-8 pallette
-        Pal = {{0/255, 0/255, 0/255, 1.0}
-        , {29/255, 43/255, 83/255, 1.0}
-        , {126/255, 37/255, 83/255, 1.0}
-        , {0/255, 135/255, 81/255, 1.0}
-        , {171/255, 82/255, 54/255, 1.0}
-        , {95/255, 87/255, 79/255, 1.0}
-        , {194/255, 195/255, 199/255, 1.0}
-        , {255/255, 241/255, 232/255, 1.0}
-        , {255/255, 0/255, 77/255, 1.0}
-        , {255/255, 163/255, 0/255, 1.0}
-        , {255/255, 236/255, 39/255, 1.0}
-        , {0/255, 228/255, 54/255, 1.0}
-        , {41/255, 173/255, 255/255, 1.0}
-        , {131/255, 118/255, 156/255, 1.0}
-        , {255/255, 119/255, 168/255, 1.0}
-        , {255/255, 204/255, 170/255, 1.0}}
+    White = {1, 1, 1, 1}
+    -- pio-8 pallette
+    Pal = {{0/255, 0/255, 0/255, 1.0}
+    , {29/255, 43/255, 83/255, 1.0}
+    , {126/255, 37/255, 83/255, 1.0}
+    , {0/255, 135/255, 81/255, 1.0}
+    , {171/255, 82/255, 54/255, 1.0}
+    , {95/255, 87/255, 79/255, 1.0}
+    , {194/255, 195/255, 199/255, 1.0}
+    , {255/255, 241/255, 232/255, 1.0}
+    , {255/255, 0/255, 77/255, 1.0}
+    , {255/255, 163/255, 0/255, 1.0}
+    , {255/255, 236/255, 39/255, 1.0}
+    , {0/255, 228/255, 54/255, 1.0}
+    , {41/255, 173/255, 255/255, 1.0}
+    , {131/255, 118/255, 156/255, 1.0}
+    , {255/255, 119/255, 168/255, 1.0}
+    , {255/255, 204/255, 170/255, 1.0}}
 
-        PalBoss = {Pal[1], Pal[2], Pal[3], Pal[9],
-                    Pal[5], Pal[6], Pal[7], Pal[8],
-                    Pal[9], Pal[10], Pal[11], Pal[15],
-                    Pal[13], Pal[14], Pal[15], Pal[16],
-                }
-
-        PalPink = {Pal[15], Pal[15], Pal[15], Pal[15],
-                    Pal[15], Pal[15], Pal[15], Pal[15],
-                    Pal[15], Pal[15], Pal[15], Pal[15],
-                    Pal[15], Pal[15], Pal[15], Pal[15],
-                }
-        
-        PalWhite = {Pal[8], Pal[8], Pal[8], Pal[8],
-                    Pal[8], Pal[8], Pal[8], Pal[8],
-                    Pal[8], Pal[8], Pal[8], Pal[8],
-                    Pal[8], Pal[8], Pal[8], Pal[8],
-                }
-        
-        -- Shader stolen from the love2d.org forums by s-ol
-        RecolorShader = love.graphics.newShader(
-            [[
-                #ifdef VERTEX
-                vec4 position( mat4 transform_projection, vec4 vertex_position)
-                {
-                    return (transform_projection * vertex_position);
-                }
-                #endif
-                #ifdef PIXEL
-                extern vec4 Pal[16]; // size of color palette (16 colors)
-                extern vec4 Target[16];
-                vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
-                {
-                    vec4 pixel = Texel(texture, texture_coords);
-                    for(int i = 0; i < 16; i++)
-                    {
-                        if (pixel == Pal[i])
-                        {
-                            return Target[i];
-                        }
-                    }
-                    return pixel;
-                }
-                #endif
-            ]]
-        )
-        RecolorShader:send("Pal", unpack(Pal))
-        
-        -- Stolen/modified from https://love2d.org/forums/viewtopic.php?t=84137
-        TransparentShader = love.graphics.newShader(
-            [[
-            extern float alpha;
-            vec4 effect(vec4 color, Image texture, vec2 tc, vec2 sc) {
-                vec4 c = Texel(texture, tc);
-                return vec4(c.r, c.g, c.b, c.a * alpha);
+    PalBoss = {Pal[1], Pal[2], Pal[3], Pal[9],
+                Pal[5], Pal[6], Pal[7], Pal[8],
+                Pal[9], Pal[10], Pal[11], Pal[15],
+                Pal[13], Pal[14], Pal[15], Pal[16],
             }
-            ]]
-        )
-        TransparentShader:send("alpha", 0.5)
 
-        local levelTxt = love.filesystem.read("/levels/level.json")
-        LevelJson = Json.decode(levelTxt)
-        Quads = {}
-        local quadsTxt = love.filesystem.read("/img/graphics.json")
-        local quadsJson = Json.decode(quadsTxt)
-        local imgW, imgH = Img:getDimensions()
-        for i, quad in pairs(quadsJson["quads"]) do
-            Quads[i] = love.graphics.newQuad(quad.x, quad.y, quad.w, quad.h, imgW, imgH)
-        end
+    PalPink = {Pal[15], Pal[15], Pal[15], Pal[15],
+                Pal[15], Pal[15], Pal[15], Pal[15],
+                Pal[15], Pal[15], Pal[15], Pal[15],
+                Pal[15], Pal[15], Pal[15], Pal[15],
+            }
+    
+    PalWhite = {Pal[8], Pal[8], Pal[8], Pal[8],
+                Pal[8], Pal[8], Pal[8], Pal[8],
+                Pal[8], Pal[8], Pal[8], Pal[8],
+                Pal[8], Pal[8], Pal[8], Pal[8],
+            }
+    
+    -- Shader stolen from the love2d.org forums by s-ol
+    RecolorShader = love.graphics.newShader(
+        [[
+            #ifdef VERTEX
+            vec4 position( mat4 transform_projection, vec4 vertex_position)
+            {
+                return (transform_projection * vertex_position);
+            }
+            #endif
+            #ifdef PIXEL
+            extern vec4 Pal[16]; // size of color palette (16 colors)
+            extern vec4 Target[16];
+            vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
+            {
+                vec4 pixel = Texel(texture, texture_coords);
+                for(int i = 0; i < 16; i++)
+                {
+                    if (pixel == Pal[i])
+                    {
+                        return Target[i];
+                    }
+                }
+                return pixel;
+            }
+            #endif
+        ]]
+    )
+    RecolorShader:send("Pal", unpack(Pal))
+    
+    -- Stolen/modified from https://love2d.org/forums/viewtopic.php?t=84137
+    TransparentShader = love.graphics.newShader(
+        [[
+        extern float alpha;
+        vec4 effect(vec4 color, Image texture, vec2 tc, vec2 sc) {
+            vec4 c = Texel(texture, tc);
+            return vec4(c.r, c.g, c.b, c.a * alpha);
+        }
+        ]]
+    )
+    TransparentShader:send("alpha", 0.5)
 
-        Sfx = {}
-        Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
-        Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
-        Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
-        Sfx["enemyShot"] = love.audio.newSource("audio/enemyShot.wav", "static")
-        Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
-        Sfx["lifeUp"] = love.audio.newSource("audio/lifeUp.wav", "static")
-        Sfx["nextWave"] = love.audio.newSource("audio/spawnWave.wav", "static")
-        Sfx["pickup"] = love.audio.newSource("audio/pickup.wav", "static")
-        Sfx["weaponPowerup"] = love.audio.newSource("audio/weaponPowerup.wav", "static")
-        Sfx["weaponPowerdown"] = love.audio.newSource("audio/weaponPowerdown.wav", "static")
-        Sfx["bombFail"] = love.audio.newSource("audio/bombFail.wav", "static")
-        Sfx["cherryBomb"] = love.audio.newSource("audio/cherryBomb.wav", "static")
-        Sfx["bossShoot"] = love.audio.newSource("audio/bossShoot.wav", "static")
-        Sfx["bossIntro"] = love.audio.newSource("audio/bossIntro.wav", "static")
-        Sfx["bossDeath"] = love.audio.newSource("audio/bossDeath.wav", "static")
+    local levelTxt = love.filesystem.read("/levels/level.json")
+    LevelJson = Json.decode(levelTxt)
+    Quads = {}
+    local quadsTxt = love.filesystem.read("/img/graphics.json")
+    local quadsJson = Json.decode(quadsTxt)
+    local imgW, imgH = Img:getDimensions()
+    for i, quad in pairs(quadsJson["quads"]) do
+        Quads[i] = love.graphics.newQuad(quad.x, quad.y, quad.w, quad.h, imgW, imgH)
+    end
 
-        Music = {}
+    local os = love.system.getOS()
+    WebMode = (os == "Android" or os == "iOS")
+    MouseMode = (os == "Android" or os == "iOS")
+    MouseDoubleClick = false
+    MouseDown = false
+
+    Sfx = {}
+    Sfx["laser"] = love.audio.newSource("audio/laser.wav", "static")
+    Sfx["hurt"] = love.audio.newSource("audio/hurt.wav", "static")
+    Sfx["enemyHit"] = love.audio.newSource("audio/enemyHit.wav", "static")
+    Sfx["enemyShot"] = love.audio.newSource("audio/enemyShot.wav", "static")
+    Sfx["enemyShieldHit"] = love.audio.newSource("audio/enemyShieldHit.wav", "static")
+    Sfx["lifeUp"] = love.audio.newSource("audio/lifeUp.wav", "static")
+    Sfx["nextWave"] = love.audio.newSource("audio/spawnWave.wav", "static")
+    Sfx["pickup"] = love.audio.newSource("audio/pickup.wav", "static")
+    Sfx["weaponPowerup"] = love.audio.newSource("audio/weaponPowerup.wav", "static")
+    Sfx["weaponPowerdown"] = love.audio.newSource("audio/weaponPowerdown.wav", "static")
+    Sfx["bombFail"] = love.audio.newSource("audio/bombFail.wav", "static")
+    Sfx["cherryBomb"] = love.audio.newSource("audio/cherryBomb.wav", "static")
+    Sfx["bossShoot"] = love.audio.newSource("audio/bossShoot.wav", "static")
+    Sfx["bossIntro"] = love.audio.newSource("audio/bossIntro.wav", "static")
+    Sfx["bossDeath"] = love.audio.newSource("audio/bossDeath.wav", "static")
+
+    Music = {}
+    if WebMode == false then
         Music["start"] = love.audio.newSource("audio/intro.xm", "stream")
         Music["game"] = love.audio.newSource("audio/gameplay.xm", "stream")
         Music["firstlevel"] = love.audio.newSource("audio/firstlevel.xm", "stream")
@@ -155,73 +144,72 @@ function love.load()
         Music["over"] = love.audio.newSource("audio/lose.xm", "stream")
         Music["win"] = love.audio.newSource("audio/win.xm", "stream")
         Music["bossMusic"] = love.audio.newSource("audio/bossMusic.xm", "stream")
-        
-        Ship = {}
-        ShipPrototype = {
-            frames = {1, 2, 3}
-        }
-        Ship.sprite = 2
-        AttackFrequency = 60
-        FireFrequency = 20
-        NextFire = 0
-        FlameSpr = 4
-        Lives = 3
-        Lockout = 0
-        Stars = {}
-        Enemies = {}
-        Floats = {}
-        Particles = {}
-        Pickups = {}
-        Shockwaves = {}
-        ShootOK = true
-        ShotType = 1
-        ShotTypes = {
-            {
-                frames = {11}
-                , sprite = 43
-                , name = "Vulcan"
-            }, 
-            {
-                frames = {53}
-                , sprite = 44
-                , name = "Laser"
-            }, 
-            {
-                frames = {54}
-                , sprite = 45
-                , name = "Spread"
-            }, 
-            {
-                frames = {55}
-                , sprite = 46
-                , name = "Wave"
-            }} -- Fire Ball, Laser, Spread, Wave
-        CherrySpr = 42
-        Shots = {}
-        EnemyShots = {}
-        ButtonReady = false
-        BlinkT = 1
-        InvulnerableMax = 60
-        ShotTimeoutMax = 4
-        FlashTimeoutMax = 2
-        FlashTimeoutBoss = 5
-        T = 0
-        Wave = 0
-        Shake = 0
-        ScreenFlash = 0
-        Cherries = 0
-        WebMode = false
-        HighScore = 0
-        PeekerX = ScreenW / 2
-
-        -- Debug = "chicken"
-        Keys = {}
-        KeysPrev = {}
-        CurrentJoystick = 0
-        Joysticks = {}
-        LoadHighScore()
-        StartTitle()
     end
+    
+    Ship = {}
+    ShipPrototype = {
+        frames = {1, 2, 3}
+    }
+    Ship.sprite = 2
+    AttackFrequency = 60
+    FireFrequency = 20
+    NextFire = 0
+    FlameSpr = 4
+    Lives = 3
+    Lockout = 0
+    Stars = {}
+    Enemies = {}
+    Floats = {}
+    Particles = {}
+    Pickups = {}
+    Shockwaves = {}
+    ShootOK = true
+    ShotType = 1
+    ShotTypes = {
+        {
+            frames = {11}
+            , sprite = 43
+            , name = "Vulcan"
+        }, 
+        {
+            frames = {53}
+            , sprite = 44
+            , name = "Laser"
+        }, 
+        {
+            frames = {54}
+            , sprite = 45
+            , name = "Spread"
+        }, 
+        {
+            frames = {55}
+            , sprite = 46
+            , name = "Wave"
+        }} -- Fire Ball, Laser, Spread, Wave
+    CherrySpr = 42
+    Shots = {}
+    EnemyShots = {}
+    ButtonReady = false
+    BlinkT = 1
+    InvulnerableMax = 60
+    ShotTimeoutMax = 4
+    FlashTimeoutMax = 2
+    FlashTimeoutBoss = 5
+    T = 0
+    Wave = 0
+    Shake = 0
+    ScreenFlash = 0
+    Cherries = 0        
+    HighScore = 0
+    PeekerX = ScreenW / 2
+
+    -- Debug = "chicken"
+    Keys = {}
+    KeysPrev = {}
+    CurrentJoystick = 0
+    Joysticks = {}        
+    LoadHighScore()
+    StartTitle()
 end
 
 -- _DRAW() in PICO-8, 30 FPS
@@ -266,15 +254,34 @@ function love.joystickremoved(joystick)
     end
 end
 
+function love.mousereleased( x, y, button, istouch, presses )
+    if presses > 1 then
+        MouseDoubleClick = true        
+    end
+    MouseDown = false
+end
+
+function love.mousepressed(x, y, button, istouch, presses)
+    MouseDown = true
+end
+
 function love.keypressed(key)
-    if key == "escape" then
+    if key == "escape" and WebMode == false then
         love.event.quit()
+    end
+end
+
+function love.keyreleased(key, scancode)
+    if key == "m" then
+        MouseMode = not MouseMode
     end
 end
 
 function love.quit()
     --print("Goodbye")
-    SaveHighScore()
+    if not WebMode then
+        SaveHighScore()
+    end
 end
 
 --- _UPDATE in PICO-8, Hard 30 FPS
@@ -734,6 +741,35 @@ function ReadInput()
     Keys.escape = false
     Keys.printScr = false
 
+    if MouseMode then
+        local mouseX, mouseY = love.mouse.getPosition()
+        mouseX = mouseX / ScreenScale
+        mouseY = mouseY / ScreenScale
+        if Ship ~= nil and Ship.x ~= nil and Ship.y ~= nil then
+            if math.abs(mouseX - Ship.x) > 5 then
+                if mouseX > Ship.x then
+                    Keys.right = true
+                elseif mouseX < Ship.x then
+                    Keys.left = true
+                end
+            end
+        
+            if math.abs(mouseY - Ship.y) > 5 then
+                if mouseY > Ship.y then
+                    Keys.down = true
+                elseif mouseY < Ship.y then
+                    Keys.up = true
+                end
+            end
+        end
+
+        if MouseDoubleClick == true then
+            MouseDoubleClick = false
+            Keys.b = true
+        end
+        Keys.a = MouseDown
+    end
+
     -- Read the keyboard
     if love.keyboard.isDown("z") then Keys.a = true end
     if love.keyboard.isDown("x") then Keys.b = true end
@@ -747,8 +783,8 @@ function ReadInput()
     if love.keyboard.isDown("down") then Keys.down = true end
     if love.keyboard.isDown("left") then Keys.left = true end
     if love.keyboard.isDown("right") then Keys.right = true end
-    if love.keyboard.isDown("q") then Keys.escape = true end
-    if love.keyboard.isDown("escape") then Keys.escape = true end
+    if love.keyboard.isDown("q") and WebMode == false then Keys.escape = true end
+    if love.keyboard.isDown("escape") and WebMode == false then Keys.escape = true end
     if love.keyboard.isDown("p") then Keys.printScr = true end
 
     -- Override if joystick set
