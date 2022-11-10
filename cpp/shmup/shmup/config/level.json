@@ -1,0 +1,126 @@
+{
+    "waves": [
+        {
+            "name": "Space Invaders"
+            , "attackFrequency": 100
+            , "fireFrequency": 40
+            , "formation": [
+                  ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+                , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+                , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+                , ["", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", ""]
+            ]
+        }
+        , {
+            "name": "Delta Formation"
+            , "attackFrequency": 100
+            , "fireFrequency": 40
+            , "formation": [
+                  ["spinner", "jelly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "jelly", "spinner"]
+                , ["", "spinner", "jelly", "", "", "", "", "jelly", "spinner", ""]
+                , ["", "", "spinner", "jelly", "", "", "jelly", "spinner", "", ""]
+                , ["", "", "", "spinner", "jelly", "jelly", "spinner", "", "", ""]
+            ]
+        }
+        , {
+            "name": "Dive Bomb"
+            , "attackFrequency": 90
+            , "fireFrequency": 40
+            , "formation": [
+                ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+              , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+              , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+              , ["spinner", "spinner", "", "eye", "eye", "eye", "eye", "", "spinner", "spinner"]
+          ]
+        }
+        , {
+            "name": "Zeta Formation"
+            , "attackFrequency": 80
+            , "fireFrequency": 40
+            , "formation": [
+                  ["butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly"]
+                , ["", "", "", "", "", "", "", "spinner", "devil", ""]
+                , ["", "", "", "devil", "spinner", "devil", "spinner", "", "", ""]
+                , ["", "devil", "spinner", "", "", "", "", "", "", ""]
+                , ["jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly", "jelly", "butterfly"]
+            ]
+        }
+        , {
+            "name": "Sneak Attack"
+            , "attackFrequency": 80
+            , "fireFrequency": 30
+            , "formation": [
+                  ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
+                , ["eye", "eye", "devil", "devil", "eye", "eye", "devil", "devil", "eye", "eye"]
+                , ["eye", "eye", "devil", "devil", "devil", "devil", "devil", "devil", "eye", "eye"]
+                , ["eye", "eye", "devil", "devil", "devil", "devil", "devil", "devil", "eye", "eye"]
+            ]
+        }
+        , {
+            "name": "Ordered Formation"
+            , "attackFrequency": 80
+            , "fireFrequency": 30
+            , "formation": [
+                  ["butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly", "butterfly"]
+                , ["devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil", "devil"]
+                , ["jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly", "jelly"]
+                , ["eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye"]
+            ]
+        }
+        , {
+            "name": "Dive Bomb II"
+            , "attackFrequency": 60
+            , "fireFrequency": 20
+            , "formation": [
+                  ["", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", ""]
+                , ["devil", "butterfly", "jelly", "", "eye", "", "eye", "jelly", "butterfly", "devil"]
+                , ["", "butterfly", "jelly", "eye", "", "eye", "", "jelly", "butterfly", ""]
+                , ["devil", "butterfly", "jelly", "spinner", "spinner", "spinner", "spinner", "jelly", "butterfly", "devil"]
+            ]
+        }
+        , {
+            "name": "Fortified Shooter"
+            , "attackFrequency": 60
+            , "fireFrequency": 20
+            , "formation": [
+                  ["", "devil", "", "devil", "", "devil", "", "devil", "", "devil"]
+                , ["devil", "", "devil", "", "devil", "", "devil", "", "devil", ""]
+                , ["butterfly", "devil", "butterfly", "devil", "butterfly", "devil", "butterfly", "devil", "butterfly", "devil"]
+                , ["devil", "jelly", "devil", "jelly", "devil", "jelly", "devil", "jelly", "devil", ""]
+            ]
+        }
+        , {
+            "name": "The Big One"
+            , "attackFrequency": 40
+            , "fireFrequency": 20
+            , "formation": [
+                  ["", "", "", "", "chungus", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+            ]
+        }
+        , {
+            "name": "Full Assault"
+            , "attackFrequency": 40
+            , "fireFrequency": 20
+            , "formation": [
+                  ["", "", "", "butterfly", "chungus", "", "butterfly", "", "", ""]
+                , ["", "", "spinner", "eye", "", "", "eye", "spinner", "", ""]
+                , ["", "devil", "eye", "eye", "eye", "eye", "eye", "eye", "devil", ""]
+                , ["jelly", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "eye", "jelly"]
+            ]
+        }
+        , {
+            "name": "The Eye of Doom"
+            , "attackFrequency": 10
+            , "fireFrequency": 10
+            , "formation": [
+                  ["", "", "", "", "boss", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+                , ["", "", "", "", "", "", "", "", "", ""]
+            ]
+        }
+    ]
+}

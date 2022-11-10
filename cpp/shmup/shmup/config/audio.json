@@ -1,0 +1,28 @@
+{
+	"sfx": {
+		"laser": "audio/laser.wav"
+		, "hurt": "audio/hurt.wav"
+		, "enemyHit": "audio/enemyHit.wav"
+		, "enemyShot": "audio/enemyShot.wav"
+		, "enemyShieldHit": "audio/enemyShieldHit.wav"
+		, "lifeUp": "audio/lifeUp.wav"
+		, "nextWave": "audio/spawnWave.wav"
+		, "pickup": "audio/pickup.wav"
+		, "weaponPowerup": "audio/weaponPowerup.wav"
+		, "weaponPowerdown": "audio/weaponPowerdown.wav"
+		, "bombFail": "audio/bombFail.wav"
+		, "cherryBomb": "audio/cherryBomb.wav"
+		, "bossShoot": "audio/bossShoot.wav"
+		, "bossIntro": "audio/bossIntro.wav"
+		, "bossDeath": "audio/bossDeath.wav"
+	}
+	, "music": {
+		"start": "audio/intro.xm"
+        , "game": "audio/gameplay.xm"
+        , "firstlevel": "audio/firstlevel.xm"
+        , "nextwave": "audio/nextwave.xm"
+        , "over": "audio/lose.xm"
+        , "win": "audio/win.xm"
+        , "bossMusic": "audio/bossMusic.xm"
+	}
+}

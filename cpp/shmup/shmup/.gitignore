@@ -1,0 +1,9 @@
+Debug
+packages
+.vs
+jsoncpp.cpp
+json
+.o
+shmup
+shmup.exe
+.gitignore~
