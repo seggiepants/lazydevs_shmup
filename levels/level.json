@@ -20,7 +20,7 @@
         }
         , "spinner": {
             "hp": 4
-            , "animationSpeed": 0.25
+            , "animationSpeed": 0.125
             , "frames": [17, 18, 19, 20]
             , "points": 175
         }

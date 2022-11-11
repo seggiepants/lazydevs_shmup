@@ -1,4 +1,17 @@
-OBJS = Input.o Particle.o Scene.o SceneStart.o Shockwave.o Star.o Starfield.o common.o draw.o game.o main.o jsoncpp.o
+OBJS = Enemy.o \
+	Input.o \
+	Particle.o \
+	Scene.o \
+	SceneStart.o \
+	Shockwave.o \
+	Sprite.o \
+	Star.o \
+	Starfield.o \
+	common.o \
+	draw.o \
+	game.o \
+	main.o \
+	jsoncpp.o
 CFLAGS = -Wall -g
 CC = g++
 INCLUDES = -I ~/Documents/code/raylib/src -I .

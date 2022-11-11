@@ -5,36 +5,91 @@
             , "animationSpeed": 0.4
             , "frames": [13, 14, 15, 16]
             , "points": 100
+            , "shot": {
+                "animationSpeed": 0.4
+                , "frames": [23, 24, 25, 24]
+                , "colX": 3
+                , "colY": 3
+                , "colWidth": 2
+                , "colHeight": 2
+                , "sy": 2
+                }
         }
         , "jelly": {
             "hp": 2
             , "animationSpeed": 0.2
             , "frames": [26, 27, 28, 29]
             , "points": 125
+            , "shot": {
+                "animationSpeed": 0.4
+                , "frames": [61, 62, 63, 64]
+                , "colX": 3
+                , "colY": 3
+                , "colWidth": 2
+                , "colHeight": 2
+                , "sy": 1.5
+            }
         }
         , "devil": {
             "hp": 2
             , "animationSpeed": 0.3
             , "frames": [30, 31]
             , "points": 150
+            , "shot": {
+                    "animationSpeed": 0.4
+                    , "frames": [59, 60]
+                    , "colX": 1
+                    , "colY": 5
+                    , "colWidth": 3
+                    , "colHeight": 2
+                    , "sy": 2
+                    , "sx": 0
+            }
         }
         , "spinner": {
             "hp": 4
             , "animationSpeed": 0.25
             , "frames": [17, 18, 19, 20]
             , "points": 175
+            , "shot": {
+                    "animationSpeed": 0.4
+                    , "frames": [65, 66]
+                    , "colX": 0
+                    , "colY": 0
+                    , "colWidth": 3
+                    , "colHeight": 4
+                    , "sy": 2
+            }
         }
         , "butterfly": {
             "hp": 3
             , "animationSpeed": 0.2
             , "frames": [32, 33, 34, 33]
             , "points": 125
+            , "shot": {
+                    "animationSpeed": 0.4
+                    , "frames": [70, 71]
+                    , "colX": 3
+                    , "colY": 3
+                    , "colWidth": 2
+                    , "colHeight": 2
+                    , "sy": 1.5
+            }
         }
         , "chungus": {
             "hp": 25
             , "animationSpeed": 0.4
             , "frames": [40, 41]
             , "points": 300
+            , "shot": {
+                    "animationSpeed": 0.4
+                    , "frames": [67, 68, 69, 68]
+                    , "colX": 3
+                    , "colY": 3
+                    , "colWidth": 2
+                    , "colHeight": 2
+                    , "sy": 1.25
+            }
         }
         , "boss": {
             "hp": 125

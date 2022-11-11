@@ -6,6 +6,7 @@ class Scene
 {
 public:
 		Scene();
+		virtual ~Scene();
 		virtual void Draw();
 		virtual void Update(float dt);
 };

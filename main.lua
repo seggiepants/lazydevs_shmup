@@ -152,7 +152,7 @@ function love.load()
     }
     Ship.sprite = 2
     AttackFrequency = 60
-    FireFrequency = 20
+    FireFrequency = 30
     NextFire = 0
     FlameSpr = 4
     Lives = 3
@@ -191,7 +191,7 @@ function love.load()
     EnemyShots = {}
     ButtonReady = false
     BlinkT = 1
-    InvulnerableMax = 60
+    InvulnerableMax = 120
     ShotTimeoutMax = 4
     FlashTimeoutMax = 2
     FlashTimeoutBoss = 5
