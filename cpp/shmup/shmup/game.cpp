@@ -13,6 +13,7 @@ GameState::GameState()
 	quit = false;
 	Shake = 0.0f;
 	starfield.Init();
+    T = 0;
 	Image graphics = LoadImage("img/graphics.png");
 	texture = LoadTextureFromImage(graphics);
     SceneStart* sceneStart = new SceneStart();

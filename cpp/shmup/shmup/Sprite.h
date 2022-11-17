@@ -13,6 +13,8 @@ public:
     Sprite(Json::Value* prototype);
     ~Sprite();
     void Init(Json::Value* prototype);
+    void Update(float dt);
+    void Draw();
 private:
     Rectangle position;
     Vector2 velocity;

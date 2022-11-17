@@ -14,6 +14,9 @@ public:
     ~Enemy();
 private:
     int hp;
+    int wait;
+    int time;
+    bool visible;
     float animationSpeed;
     int points;
     std::string type;

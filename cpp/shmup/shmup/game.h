@@ -29,6 +29,7 @@ public:
 	bool quit;
 	int blinkT;
 	Scene* currentScene;
+	long T;
 private:
 	GameState();
 	static GameState* instance;

@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClCompile Include="common.cpp" />
     <ClCompile Include="draw.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
@@ -151,18 +152,21 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneStart.cpp" />
     <ClCompile Include="Shockwave.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Star.cpp" />
     <ClCompile Include="Starfield.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
     <ClInclude Include="draw.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneStart.h" />
     <ClInclude Include="Shockwave.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="Star.h" />
     <ClInclude Include="Starfield.h" />
   </ItemGroup>

@@ -123,5 +123,30 @@ void Sprite::Init(Json::Value* prototype)
                 }
             }
         }
+    }    
+}
+
+void Sprite::Update(float dt)
+{
+    if (!this->dead)
+    {
+        this->position.x += this->velocity.x * dt;
+        this->position.y += this->velocity.y * dt;
     }
+}
+
+void Sprite::Draw()
+{
+    int x = static_cast<int>(this->position.x);
+    int y = static_cast<int>(this->position.y);
+    GameState* state = GameState::GetInstance();
+    if (this->shake > 0)
+    {
+        this->shake--;
+        if (state->T % 4 < 2)
+        {
+            x++;
+        }
+    }
+    DrawTextureRec(state->texture, state->quads[static_cast<int>(floor(this->sprite))], { static_cast<float>(x), static_cast<float>(y) }, WHITE);
 }

@@ -2,6 +2,12 @@
 
 Enemy::Enemy(Json::Value* prototype) : Sprite(prototype)
 {
+    this->type = "eye";
+    this->hp = 1;
+    this->wait = 0;
+    this->animationSpeed = 0.4;
+    this->time = 0;
+    this->visible = false;
     if (prototype != nullptr)
     {
         if (prototype->isObject())
@@ -25,4 +31,9 @@ Enemy::Enemy(Json::Value* prototype) : Sprite(prototype)
             }
         }
     }
+}
+
+Enemy::~Enemy()
+{
+
 }
