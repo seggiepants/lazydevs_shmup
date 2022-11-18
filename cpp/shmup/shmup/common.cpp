@@ -18,7 +18,7 @@ void IncrementBlink()
 {
     GameState* state = GameState::GetInstance();
     state->blinkT++;
-    if (state->blinkT >= sizeof(blinkAni) / sizeof(int))
+    if (state->blinkT >= (sizeof(blinkAni) / sizeof(int)))
     {
         state->blinkT = 0;
     }

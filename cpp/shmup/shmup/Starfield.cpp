@@ -42,7 +42,6 @@ void Starfield::Draw()
 void Starfield::Init()
 {
     const int NUM_STARS = 100;
-    const int starClr[] = { 6, 7, 8, 16 };
     this->stars.clear();
     
     for (int i = 0; i < NUM_STARS; ++i)

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <string>
 #include "Sprite.h"
 #include "game.h"
@@ -30,6 +31,9 @@ void Sprite::Init(Json::Value* prototype)
     this->flash = 0.0;
     this->shake = 0.0;    
     this->dead = false;
+    this->ghost = false;
+    this->animationSpeed = 0.0;
+    this->animationTimer = 0.0;
     this->frames.clear();
 
     if (prototype != nullptr)
@@ -92,6 +96,10 @@ void Sprite::Init(Json::Value* prototype)
                 {
                     this->dead = prototype->get(member, this->dead).asBool();
                 }
+                else if (member == "ghost")
+                {
+                    this->ghost = prototype->get(member, this->ghost).asBool();
+                }
                 else if (member == "frames")
                 {
                     Json::Value frames = prototype->get(member, new std::vector<int>());
@@ -100,6 +108,14 @@ void Sprite::Init(Json::Value* prototype)
                     {
                         this->frames.push_back(frames[j].asInt());
                     }
+                }
+                else if (member == "animationSpeed")
+                {
+                    this->animationSpeed = prototype->get(member, this->animationSpeed).asFloat();
+                }
+                else if (member == "animationTimer")
+                {
+                    this->animationTimer = prototype->get(member, this->animationTimer).asFloat();
                 }
             }
 
@@ -133,6 +149,49 @@ void Sprite::Update(float dt)
         this->position.x += this->velocity.x * dt;
         this->position.y += this->velocity.y * dt;
     }
+
+    // Animate
+    if (animationSpeed > 0)
+    {
+        animationTimer += dt;
+        while (animationTimer >= animationSpeed)
+        {
+            spriteIndex++;
+            animationTimer -= animationSpeed;
+            if (spriteIndex >= frames.size())
+                spriteIndex = 0;
+        }
+        sprite = frames[spriteIndex];
+    }
+}
+
+bool Sprite::Collide(Sprite* other)
+{
+    if (ghost || dead || other->ghost || other->dead)
+        return false;
+
+    Rectangle a = GetCollisionRect();
+    Rectangle b = other->GetCollisionRect();
+
+    if (a.y >= b.y + b.height - 1)
+        return false;
+    
+    if (a.x >= b.x + b.width - 1)
+        return false;
+
+    if (a.x + a.width - 1 <= b.x)
+        return false;
+    
+    if (a.y + a.height - 1 <= b.y)
+        return false;
+
+    return true;
+}
+
+Rectangle Sprite::GetCollisionRect()
+{
+    Rectangle r = { position.x + collision.x, position.y + collision.y, collision.width, collision.height };
+    return r;
 }
 
 void Sprite::Draw()

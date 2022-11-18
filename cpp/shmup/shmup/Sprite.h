@@ -15,15 +15,20 @@ public:
     void Init(Json::Value* prototype);
     void Update(float dt);
     void Draw();
-private:
+    bool Collide(Sprite* other);
+    virtual Rectangle GetCollisionRect();
+protected:
     Rectangle position;
     Vector2 velocity;
     Rectangle collision;
-    float spriteIndex;
+    float animationSpeed;
+    float animationTimer;
+    size_t spriteIndex;
     int sprite;
     float flash;
     float shake;
     bool dead;
+    bool ghost;
     std::vector<int> frames;
 };
 

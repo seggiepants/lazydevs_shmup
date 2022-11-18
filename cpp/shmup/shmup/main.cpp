@@ -142,9 +142,6 @@ int main(int argc, char** argv)
     Sound laserSound = LoadSound("audio/laser.wav");
     SetSoundVolume(laserSound, 1.0);
 
-    int boss = 74;
-    int alien = 12;
-
     GameState* state = GameState::GetInstance();
     Json::Value jsonImg;
     if (!LoadJson("config/graphics.json", &jsonImg))
@@ -167,9 +164,6 @@ int main(int argc, char** argv)
         state->quads.push_back(r);
     }
 
-    float x = (SCREEN_W - state->quads[boss].width) / 2.0f;
-    float y = (SCREEN_H - state->quads[boss].height) / 2.0f;
-    Vector2 position = { x, y };
     Starfield* starfield = new Starfield();
     SetTargetFPS(60);
     state->Shake = 22.0f;
@@ -190,25 +184,7 @@ int main(int argc, char** argv)
         rlPushMatrix();
         rlScalef(SCREEN_SCALE, SCREEN_SCALE, 1.0);
         ScreenShake();
-        state->currentScene->Draw();
-        /*
-        ClearBackground(BLACK);
-        starfield->Draw();
-        DrawLine(0, 0, static_cast<int>(SCREEN_W - 1.0), static_cast<int>(SCREEN_H - 1.0), WHITE);
-        DrawLine(static_cast<int>(SCREEN_W - 1.0), 0, 0, static_cast<int>(SCREEN_H - 1.0), WHITE);
-        DrawTextureRec(state->texture, state->quads[alien], { 32, 16 }, WHITE);
-
-        BeginShaderMode(shaderRecolor);
-        DrawTextureRec(state->texture, state->quads[alien], { 48, 16 }, WHITE);
-        EndShaderMode();
-
-        BeginShaderMode(shaderAlpha);
-        DrawTextureRec(state->texture, state->quads[boss], position, WHITE);
-        EndShaderMode();
-        DrawTextureRec(state->texture, state->quads[boss], { position.x, position.y + 20 }, WHITE);
-        DrawTextEx(state->font, "Score: 90", { 0.0, 0.0 }, 8, 1, GREEN);
-        */
-        
+        state->currentScene->Draw();        
         rlPopMatrix();
         EndDrawing();
     }

@@ -7,7 +7,6 @@ struct Star
 	float x;
 	float y;
 	float spd;
-	int clr;
 };
 
 #endif

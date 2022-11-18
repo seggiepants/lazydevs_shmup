@@ -1,4 +1,5 @@
-OBJS = Enemy.o \
+OBJS = Bullet.o \
+	Enemy.o \
 	Input.o \
 	Particle.o \
 	Scene.o \

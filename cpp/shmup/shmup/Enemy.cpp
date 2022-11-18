@@ -24,10 +24,6 @@ Enemy::Enemy(Json::Value* prototype) : Sprite(prototype)
                 {
                     this->points = prototype->get(member, this->points).asInt();
                 }
-                else if (member == "animationSpeed")
-                {
-                    this->animationSpeed = prototype->get(member, this->animationSpeed).asFloat();
-                }
             }
         }
     }

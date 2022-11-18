@@ -27,9 +27,9 @@ public:
 	Starfield starfield;
 	Texture2D texture;
 	bool quit;
-	int blinkT;
+	size_t blinkT;
 	Scene* currentScene;
-	long T;
+	size_t T;
 private:
 	GameState();
 	static GameState* instance;
